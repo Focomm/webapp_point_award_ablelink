@@ -1,79 +1,69 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
 
-import module.page1 as page1
-import module.page2 as page2
-import module.page3 as page3
+import module_user.page1 as user_page1
+import module_user.page2 as user_page2
+import module_user.page3 as user_page3
 
-import time
+import module_admin.page1 as admin_page1
+import module_admin.page2 as admin_page2
+import module_admin.page3 as admin_page3
 
-st.set_page_config(page_title="Ablelink Dashboard", 
-                   layout="wide")
+st.set_page_config(page_title="Ablelink Dashboard", layout="wide")
 
-# ตรวจสอบว่ามีค่า authenticated ใน session_state หรือไม่
+
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
+if "user_role" not in st.session_state:
+    st.session_state.user_role = None
 
-# ตรวจสอบ Query Parameters เพื่อสลับหน้า
+# 🔁 ตรวจสอบ redirect หลัง login
+if "redirect_to" in st.session_state:
+    st.query_params.update({"page": st.session_state.redirect_to})
+    del st.session_state.redirect_to
+    st.rerun()
+
+# 🌐 อ่านค่าหน้าจาก URL
 page = st.query_params.get("page", "login")
 
-def login():
-    """ ฟังก์ชันสำหรับแสดงฟอร์มล็อกอิน """
-    st.title("Login Page")
-
-    actual_email = "admin"
-    actual_password = "admin1234"
-
-    # สร้าง container สำหรับ login form
-    placeholder = st.empty()
-
-    with placeholder.form("login"):
-        st.markdown("#### Enter your credentials")
-        email = st.text_input("Email")
-        password = st.text_input("Password", type="password")
-        submit = st.form_submit_button("Login")
-
-    if submit:
-        if email == actual_email and password == actual_password:
-            st.session_state.authenticated = True
-            placeholder.empty()
-            st.success("Login successful, redirecting...")
-            time.sleep(1)
-
-            # ตั้งค่าหน้าไปที่ index
-            st.query_params["page"] = "index"
-            st.rerun()
-        else:
-            st.error("Login failed")
-
-
-def main():
-    with st.sidebar:
+def main_user():
+    st.title("👤 Hello User")
     
-        selected = option_menu("Main Menu", ["Menu1", 'Menu2','Menu3'], 
+    with st.sidebar:
+        selected = option_menu("User Menu", ["Menu1", 'Menu2','Menu3'],
             icons=['house', 'receipt','box2'], menu_icon="cast", default_index=0)
         
-        for i in range(10):
-            st.write('')
-        
-
-        st.image("https://ablelink.co.th/wp-content/uploads/2024/02/logo350-100.png", use_container_width=True)
-
-        
-    
-
-
     if selected == 'Menu1':
-        page1.menu_1()
-
+        user_page1.user_page1()
     elif selected == 'Menu2':
-        page2.menu_2()
-
+        user_page2.user_page2()
     elif selected == 'Menu3':
-        page3.menu_3()
+        user_page3.user_page3()
 
 
-if page == "index" and st.session_state.authenticated:
-    main()
+def main_admin():
+    st.title("🛠️ Hello Admin")
+
+    with st.sidebar:
+        selected = option_menu("Admin Menu", ["Menu1", 'Menu2','Menu3'],
+            icons=['bar-chart', 'file-earmark-text'], menu_icon="tools", default_index=0)
+        
+    if selected == 'Menu1':
+        admin_page1.admin_page1()
+    elif selected == 'Menu2':
+        admin_page2.admin_page2()
+    elif selected == 'Menu3':
+        admin_page3.admin_page3()
+
+
+# 🚪 ตัดสินใจว่าจะแสดงหน้าอะไร
+if st.session_state.authenticated and st.session_state.user_role:
+    if page == "admin":
+        main_admin()
+    elif page == "user":
+        main_user()
+    else:
+        st.error("⛔️ ไม่รู้ว่าจะไปหน้าไหน (page=?)")
 else:
-    login()
+    from login import login_page
+    login_page()

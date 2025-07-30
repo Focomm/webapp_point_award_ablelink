@@ -1,39 +1,50 @@
+# login.py
 import streamlit as st
+import bcrypt
+from db import get_connection
 import time
 
-# ตรวจสอบว่า authenticated มีอยู่ใน session_state หรือไม่
-if "authenticated" not in st.session_state:
-    st.session_state.authenticated = False
+def login_page():
+    if "authenticated" not in st.session_state:
+        st.session_state.authenticated = False
 
-# ตั้งค่าข้อมูลล็อกอินจริง
-actual_email = "admin"
-actual_password = "admin1234"
+    if not st.session_state.authenticated:
+        st.title("🔐 Login Page")
+        with st.form("login_form"):
+            User_ID = st.text_input("User ID")
+            password = st.text_input("Password", type="password")
+            submit = st.form_submit_button("Login")
 
-# ถ้าผู้ใช้ล็อกอินแล้ว ให้เปลี่ยนไปที่ index.py ทันที
-if st.session_state.authenticated:
-    st.query_params["page"] = "index"  # ✅ ใช้ query_params แทน experimental_set_query_params
-    st.rerun()  
+        if submit:
+            try:
+                conn = get_connection()
+                cur = conn.cursor()
+                cur.execute("SELECT hashed_password FROM kpigoalpoint.auth_credentials WHERE user_id = %s", (User_ID,))
+                row = cur.fetchone()
 
-# สร้าง container สำหรับ login form
-placeholder = st.empty()
-
-# แสดงฟอร์มล็อกอิน
-with placeholder.form("login"):
-    st.markdown("#### Enter your credentials")
-    email = st.text_input("Email")
-    password = st.text_input("Password", type="password")
-    submit = st.form_submit_button("Login")
-
-# ตรวจสอบการล็อกอิน
-if submit:
-    if email == actual_email and password == actual_password:
-        st.session_state.authenticated = True
-        placeholder.empty()
-        st.success("Login successful, redirecting...")
-        time.sleep(1)
-
-        # ตั้งค่าหน้าไปที่ index.py
-        st.query_params["page"] = "index"  # ✅ ใช้ query_params
-        st.rerun()
+                if row and bcrypt.checkpw(password.encode(), row[0].encode()):
+                    cur.execute("SELECT role_onweb FROM kpigoalpoint.users WHERE user_id = %s", (User_ID,))
+                    role_row = cur.fetchone()
+                    if role_row:
+                        role = role_row[0]
+                        st.session_state.authenticated = True
+                        st.session_state.user_id = User_ID
+                        st.session_state.user_role = role
+                        st.success("✅ Login success, redirecting...")
+                        time.sleep(1)
+                        st.query_params.update({"page": role})
+                        st.rerun()
+                    else:
+                        st.error("❌ ไม่พบข้อมูลใน table users")
+                else:
+                    st.error("❌ Email หรือ password ไม่ถูกต้อง")
+            except Exception as e:
+                st.error(f"❌ Database error: {e}")
     else:
-        st.error("Login failed")
+        st.success("✅ Already logged in.")
+        time.sleep(0.5)
+        st.query_params.update({"page": st.session_state.get("user_role", "user")})
+        st.rerun()
+        
+if __name__ == "__main__":
+    login_page()
