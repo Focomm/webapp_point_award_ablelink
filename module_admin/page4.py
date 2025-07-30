@@ -3,5 +3,5 @@ import streamlit_shadcn_ui as ui
 from db import get_connection_app
 
 
-def admin_page1():
-    st.title(f"🛠️ Hello Admin")
+def admin_page4():
+    st.header("Menu 4 admin")

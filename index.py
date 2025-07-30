@@ -8,6 +8,7 @@ import module_user.page3 as user_page3
 import module_admin.page1 as admin_page1
 import module_admin.page2 as admin_page2
 import module_admin.page3 as admin_page3
+import module_admin.page4 as admin_page4
 
 st.set_page_config(page_title="Ablelink Dashboard", layout="wide")
 
@@ -27,33 +28,34 @@ if "redirect_to" in st.session_state:
 page = st.query_params.get("page", "login")
 
 def main_user():
-    st.title("👤 Hello User")
     
     with st.sidebar:
-        selected = option_menu("User Menu", ["Menu1", 'Menu2','Menu3'],
-            icons=['house', 'receipt','box2'], menu_icon="cast", default_index=0)
-        
-    if selected == 'Menu1':
+        selected = option_menu("User Menu", ["Your self", 'Manage point', 'Get Point'],
+            icons=['house', 'receipt', 'star'], menu_icon="cast", default_index=0)
+
+    if selected == 'Your self':
         user_page1.user_page1()
-    elif selected == 'Menu2':
+    elif selected == 'Manage point':
         user_page2.user_page2()
-    elif selected == 'Menu3':
+    elif selected == 'Get Point':
         user_page3.user_page3()
 
 
 def main_admin():
-    st.title("🛠️ Hello Admin")
-
+    
     with st.sidebar:
-        selected = option_menu("Admin Menu", ["Menu1", 'Menu2','Menu3'],
+        selected = option_menu("Admin Menu", ["Menu1", 'Menu2','Menu3','Menu4'],
             icons=['bar-chart', 'file-earmark-text'], menu_icon="tools", default_index=0)
-        
-    if selected == 'Menu1':
+
+
+    if selected == 'Menu1': # View all points
         admin_page1.admin_page1()
-    elif selected == 'Menu2':
+    elif selected == 'Menu2': # Edit user
         admin_page2.admin_page2()
-    elif selected == 'Menu3':
+    elif selected == 'Menu3': # Edit point
         admin_page3.admin_page3()
+    elif selected == 'Menu4': # Checking req 
+        admin_page4.admin_page4()
 
 
 # 🚪 ตัดสินใจว่าจะแสดงหน้าอะไร

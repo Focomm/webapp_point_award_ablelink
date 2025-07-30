@@ -1,7 +1,7 @@
 # login.py
 import streamlit as st
 import bcrypt
-from db import get_connection
+from db import get_connection_readonly
 import time
 
 def login_page():
@@ -17,7 +17,7 @@ def login_page():
 
         if submit:
             try:
-                conn = get_connection()
+                conn = get_connection_readonly()
                 cur = conn.cursor()
                 cur.execute("SELECT hashed_password FROM kpigoalpoint.auth_credentials WHERE user_id = %s", (User_ID,))
                 row = cur.fetchone()
