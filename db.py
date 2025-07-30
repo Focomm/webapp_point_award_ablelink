@@ -6,7 +6,7 @@ def get_connection_admin():
         port="55432",
         dbname="ablelink",
         user="admin",
-        password="Admin_1234"
+        password="Admin_1234" 
     )
     
 def get_connection_readonly():

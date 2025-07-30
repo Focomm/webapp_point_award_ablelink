@@ -44,15 +44,15 @@ def main_user():
 def main_admin():
     
     with st.sidebar:
-        selected = option_menu("Admin Menu", ["Menu1", 'Menu2','Menu3','Menu4'],
-            icons=['bar-chart', 'file-earmark-text'], menu_icon="tools", default_index=0)
+        selected = option_menu("Admin Menu", ["View point", 'Edit user','Edit point','Menu4'],
+            icons=['bar-chart', 'file-earmark-text', 'gear', 'check-circle'], menu_icon="tools", default_index=0)
 
 
-    if selected == 'Menu1': # View all points
+    if selected == 'View point': # View all points
         admin_page1.admin_page1()
-    elif selected == 'Menu2': # Edit user
+    elif selected == 'Edit user': # Edit user
         admin_page2.admin_page2()
-    elif selected == 'Menu3': # Edit point
+    elif selected == 'Edit point': # Edit point
         admin_page3.admin_page3()
     elif selected == 'Menu4': # Checking req 
         admin_page4.admin_page4()
