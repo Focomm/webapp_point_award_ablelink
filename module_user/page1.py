@@ -31,7 +31,6 @@ def user_page1():
          row = cur.fetchone()
          if row and row[0] is not None:
                personal_point = row[0]
-         print("personal_point =", personal_point)
       except Exception as e:
          st.error(f"❌ Failed to load personal point: {e}")
       return personal_point

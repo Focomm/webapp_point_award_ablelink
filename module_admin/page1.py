@@ -6,6 +6,7 @@ from db import get_connection_readonly
 
 def admin_page1():
     st.title(f"🛠️ Hello Admin")
+
     try:
         conn = get_connection_readonly()
 
@@ -28,21 +29,29 @@ def admin_page1():
         df = users_df.merge(points_df, left_on='user_id', right_on='user_ref_id', how='left')
         df['point_value'] = df['point_value'].fillna(0).astype(int)
 
-        # ตัวเลือก dropdown
-        all_depts = ['ทั้งหมด'] + sorted(df['dept_name'].unique().tolist())
-        all_nicks = ['ทั้งหมด'] + sorted(df['nickname'].unique().tolist())
-
         # Sidebar filter
         st.sidebar.header("🔎 ตัวกรองข้อมูล")
+
+        # ตัวเลือกแผนก
+        all_depts = ['ทั้งหมด'] + sorted(df['dept_name'].unique().tolist())
         selected_dept = st.sidebar.selectbox("เลือกแผนก", all_depts)
+
+        # Filter รายชื่อพนักงานตามแผนก
+        if selected_dept == 'ทั้งหมด':
+            nick_df = df
+        else:
+            nick_df = df[df['dept_name'] == selected_dept]
+
+        all_nicks = ['ทั้งหมด'] + sorted(nick_df['nickname'].unique().tolist())
         selected_nick = st.sidebar.selectbox("เลือกพนักงาน", all_nicks)
 
+        # เริ่มกรองข้อมูล
         filtered_df = df.copy()
 
         # กรองตามพนักงานก่อน (ถ้าเลือก)
         if selected_nick != 'ทั้งหมด':
             filtered_df = filtered_df[filtered_df['nickname'] == selected_nick]
-            # auto sync แผนกด้วย
+            # auto sync แผนกตามชื่อ
             selected_dept = filtered_df['dept_name'].iloc[0] if not filtered_df.empty else selected_dept
 
         # กรองตามแผนก (ถ้าเลือก)
@@ -56,8 +65,6 @@ def admin_page1():
         # แสดงผล
         st.markdown("### คะแนนรวม")
         col1, col2 = st.columns(2)
-        
-        
         with col1:
             ui.metric_card(title="Personal Point", content=int(total_point), description="test", key="card1")
         with col2:
