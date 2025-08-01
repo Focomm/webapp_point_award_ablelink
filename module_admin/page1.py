@@ -2,7 +2,7 @@ import streamlit as st
 import streamlit_shadcn_ui as ui
 import pandas as pd
 from db import get_connection_readonly
-
+from sqlalchemy import text
 
 def admin_page1():
     st.title(f"🛠️ Hello Admin")
@@ -11,19 +11,21 @@ def admin_page1():
         conn = get_connection_readonly()
 
         # ดึงข้อมูล users + departments
-        users_df = pd.read_sql("""
+        users_query = text("""
             SELECT u.user_id, u.full_name, u.nickname, u.dept_id,
                    d.id AS dept_real_id, d.dept_name, d.point_dpmt
             FROM kpigoalpoint.users u
             JOIN kpigoalpoint.departments d ON u.dept_id = d.id
-        """, conn)
+        """)
+        users_df = pd.read_sql(users_query, conn)
 
         # ดึงข้อมูลคะแนนจาก personal_points
-        points_df = pd.read_sql("""
+        points_query = text("""
             SELECT user_ref_id, SUM(point_value)::int AS point_value
             FROM kpigoalpoint.personal_points
             GROUP BY user_ref_id
-        """, conn)
+        """)
+        points_df = pd.read_sql(points_query, conn)
 
         # JOIN รวมคะแนนเข้ากับ users
         df = users_df.merge(points_df, left_on='user_id', right_on='user_ref_id', how='left')
@@ -66,9 +68,9 @@ def admin_page1():
         st.markdown("### คะแนนรวม")
         col1, col2 = st.columns(2)
         with col1:
-            ui.metric_card(title="Personal Point", content=int(total_point), description="test", key="card1")
+            ui.metric_card(title="Personal Point", content=int(total_point), description="คะแนนส่วนตัว", key="card1")
         with col2:
-            ui.metric_card(title="Team Point", content=int(total_dpmt), description="test", key="card2")
+            ui.metric_card(title="Team Point", content=int(total_dpmt), description="คะแนนแผนก", key="card2")
 
         st.markdown("### 👥 รายชื่อพนักงาน")
         st.dataframe(
