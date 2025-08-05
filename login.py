@@ -1,4 +1,3 @@
-# login.py
 import streamlit as st
 import bcrypt
 from db import get_connection_readonly

@@ -9,8 +9,9 @@ import module_admin.page1 as admin_page1
 import module_admin.page2 as admin_page2
 import module_admin.page3 as admin_page3
 import module_admin.page4 as admin_page4
+import module_admin.page5 as admin_page5
 
-st.set_page_config(page_title="Ablelink Dashboard", layout="wide")
+st.set_page_config(page_title="Goalpoint Focomm", layout="wide")
 
 
 if "authenticated" not in st.session_state:
@@ -44,8 +45,8 @@ def main_user():
 def main_admin():
     
     with st.sidebar:
-        selected = option_menu("Admin Menu", ["View point", 'Edit user','Edit point','Menu4'],
-            icons=['bar-chart', 'file-earmark-text', 'gear', 'check-circle'], menu_icon="tools", default_index=0)
+        selected = option_menu("Admin Menu", ["View point", 'Edit user','Edit point','Check REQ','Manage KPI'],
+            icons=['bar-chart', 'file-earmark-text', 'gear', 'check-circle',"flag"], menu_icon="tools", default_index=0)
 
 
     if selected == 'View point': # View all points
@@ -54,8 +55,10 @@ def main_admin():
         admin_page2.admin_page2()
     elif selected == 'Edit point': # Edit point
         admin_page3.admin_page3()
-    elif selected == 'Menu4': # Checking req 
+    elif selected == 'Check REQ': # Checking  
         admin_page4.admin_page4()
+    elif selected == 'Manage KPI': # Manage KPI
+        admin_page5.admin_page5()
 
 
 # 🚪 ตัดสินใจว่าจะแสดงหน้าอะไร

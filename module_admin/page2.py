@@ -179,17 +179,18 @@ def admin_page2():
                 st.warning("⚠️ ไม่สามารถลบผู้ใช้นี้ได้ เพราะมีข้อมูลคะแนนอยู่ในระบบ")
             else:
                 confirm_1 = st.checkbox(f"คุณแน่ใจหรือไม่ว่าจะลบ '{selected_display}'?", key="confirm1")
-                if st.button("✅ ยืนยันการลบ", key="delete_user") and confirm_1:
-                    try:
-                        conn.execute(text("DELETE FROM kpigoalpoint.auth_credentials WHERE user_id = :uid"), {"uid": selected_user_id})
-                        conn.execute(text("DELETE FROM kpigoalpoint.personal_points WHERE user_ref_id = :uid"), {"uid": selected_user_id})
-                        conn.execute(text("DELETE FROM kpigoalpoint.users WHERE user_id = :uid"), {"uid": selected_user_id})
-                        conn.commit()
-                        st.success(f"✅ ลบผู้ใช้ {selected_display} เรียบร้อยแล้ว")
-                    except Exception as e:
-                        conn.rollback()
-                        st.error(f"❌ ลบไม่สำเร็จ: {e}")
-                elif not confirm_1:
-                    st.warning("สติจ้า กรุณายืนยันการลบก่อน")
+                if st.button("✅ ยืนยันการลบ", key="delete_user"):
+                    if confirm_1:
+                        try:
+                            conn.execute(text("DELETE FROM kpigoalpoint.auth_credentials WHERE user_id = :uid"), {"uid": selected_user_id})
+                            conn.execute(text("DELETE FROM kpigoalpoint.personal_points WHERE user_ref_id = :uid"), {"uid": selected_user_id})
+                            conn.execute(text("DELETE FROM kpigoalpoint.users WHERE user_id = :uid"), {"uid": selected_user_id})
+                            conn.commit()
+                            st.success(f"✅ ลบผู้ใช้ {selected_display} เรียบร้อยแล้ว")
+                        except Exception as e:
+                            conn.rollback()
+                            st.error(f"❌ ลบไม่สำเร็จ: {e}")
+                    elif not confirm_1:
+                        st.warning("สติจ้า กรุณายืนยันการลบก่อน")
         except Exception as e:
             st.error(f"❌ โหลดรายชื่อผู้ใช้ล้มเหลว: {e}")
