@@ -34,7 +34,7 @@ def admin_page5():
             # กรอกข้อมูล KPI
             kpi_name = st.text_input("🎯 ชื่อ KPI")
             kpi_goal = st.text_area("📌 เป้าหมายของ KPI")
-            point_value = st.number_input("🪙 คะแนน", min_value=0, step=1)
+            point_value = st.number_input("คะแนน", min_value=0, step=1)
 
             if st.button("➕ เพิ่ม KPI"):
                 if not kpi_name.strip() or not kpi_goal.strip():
@@ -91,7 +91,7 @@ def admin_page5():
             # กรอกข้อมูล KPI
             kpi_name = st.text_input("🎯 ชื่อ KPI ทีม")
             kpi_goal = st.text_area("📌 เป้าหมายของ KPI ทีม")
-            point_value = st.number_input("🪙 คะแนน", min_value=0, step=1)
+            point_value = st.number_input("คะแนน", min_value=0, step=1)
 
             if st.button("➕ เพิ่ม KPI ทีม"):
                 if not kpi_name.strip() or not kpi_goal.strip():
