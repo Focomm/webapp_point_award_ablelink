@@ -20,8 +20,10 @@ def admin_page2():
         try:
             dept_df = pd.read_sql(text("SELECT id, dept_name FROM kpigoalpoint.departments ORDER BY dept_name"), conn)
             dept_options = dict(zip(dept_df['dept_name'], dept_df['id']))
-            dept_selected = st.selectbox("แผนก", list(dept_options.keys()))
+            dept_selected = st.selectbox("เลือกแผนก", list(dept_options.keys()))
             dept_id = dept_options[dept_selected]
+            st.write('------')
+
 
             user_id = st.text_input("User ID")
             col1, col2 = st.columns(2)
@@ -103,8 +105,7 @@ def admin_page2():
 
             if user_df.empty:
                 st.info("ยังไม่มีผู้ใช้ในระบบ")
-                return
-
+                return        
             user_map = {f"{row['full_name']} ({row['nickname']})": row['user_id'] for _, row in user_df.iterrows()}
             selected_display = st.selectbox("เลือกผู้ใช้ที่ต้องการแก้ไข", list(user_map.keys()))
             selected_user_id = user_map[selected_display]
@@ -118,6 +119,8 @@ def admin_page2():
             if row:
                 dept_df = pd.read_sql(text("SELECT id, dept_name FROM kpigoalpoint.departments ORDER BY dept_name"), conn)
                 dept_options = dict(zip(dept_df['dept_name'], dept_df['id']))
+                
+                st.write('------')
 
                 full_name = st.text_input("ชื่อ-นามสกุล", value=row[0])
                 nickname = st.text_input("ชื่อเล่น", value=row[1])

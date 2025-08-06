@@ -1,17 +1,19 @@
 import streamlit as st
 import streamlit_shadcn_ui as ui
 from sqlalchemy import text
+import pandas as pd
 from db import get_connection_app
 
 
 def admin_page5():
-    action = ["Add KPI Personal", "Add KPI TEAM","Delete KPI Personal","Delete KPI TEAM"]
+    action = ["Add KPI Personal", "Add KPI TEAM","Delete KPI Personal","Delete KPI TEAM","View KPI ALL"]
     st.sidebar.header("🔎 ตัวกรองข้อมูล")
     selected_KPI = st.sidebar.selectbox("เลือกการจัดการ", action)
     
     
     if selected_KPI == "Add KPI Personal":
         st.title("📊 เพิ่ม KPI ส่วนบุคคล test")
+        st.write('------')
 
         try:
             conn = get_connection_app()
@@ -30,6 +32,8 @@ def admin_page5():
             user_dict = {f"{row.full_name} ({row.user_id})": row.user_id for row in users}
             selected_user_display = st.selectbox("👤 เลือกผู้ใช้", list(user_dict.keys()))
             selected_user_id = user_dict[selected_user_display]
+
+            st.write('------')
 
             # กรอกข้อมูล KPI
             kpi_name = st.text_input("🎯 ชื่อ KPI")
@@ -70,6 +74,7 @@ def admin_page5():
 
     elif selected_KPI == "Add KPI TEAM":
         st.title("📊 KPI ทีม")
+        st.write('------')
 
         try:
             conn = get_connection_app()
@@ -88,8 +93,12 @@ def admin_page5():
             selected_dept_display = st.selectbox("🏢 เลือกแผนก", list(dept_dict.keys()))
             selected_dept_id = dept_dict[selected_dept_display]
 
+            st.write('------')
+            
             # กรอกข้อมูล KPI
             kpi_name = st.text_input("🎯 ชื่อ KPI ทีม")
+            
+            
             kpi_goal = st.text_area("📌 เป้าหมายของ KPI ทีม")
             point_value = st.number_input("คะแนน", min_value=0, step=1)
 
@@ -200,4 +209,62 @@ def admin_page5():
 
         except Exception as e:
             st.error(f"❌ ไม่สามารถเชื่อมต่อฐานข้อมูล: {e}")
+            
+    elif selected_KPI == "View KPI ALL":
+        st.title("📋 ดูรายการ KPI ทั้งหมด")
+
+        conn = get_connection_app()
+
+        # ดึงข้อมูล KPI ส่วนตัว + ชื่อพนักงาน + ชื่อแผนก
+        personal_query = """
+            SELECT 
+                d.dept_name,
+                u.full_name AS owner,
+                p.kpi_name,
+                p.kpi_goal,
+                p.point_value
+            FROM kpigoalpoint.kpi_personal p
+            JOIN kpigoalpoint.users u ON p.user_ref_id = u.user_id
+            JOIN kpigoalpoint.departments d ON u.dept_id = d.id
+        """
+
+
+        # ดึงข้อมูล KPI ทีม + ชื่อแผนก
+        team_query = """
+            SELECT 
+                d.dept_name,
+                d.dept_name AS owner,
+                t.kpi_name,
+                t.kpi_goal,
+                t.point_value
+            FROM kpigoalpoint.kpi_team t
+            JOIN kpigoalpoint.departments d ON t.dept_ref_id = d.id
+        """
+
+
+        df_personal = pd.read_sql(personal_query, conn)
+        df_personal["type"] = "ส่วนตัว"
+
+        df_team = pd.read_sql(team_query, conn)
+        df_team["type"] = "ทีม"
+
+        # รวมตารางแล้วเรียงตามชื่อแผนกและประเภท
+        df_all = pd.concat([df_personal, df_team], ignore_index=True)
+        df_all = df_all.rename(columns={
+            "owner": "ชื่อผู้รับผิดชอบ",
+            "kpi_name": "ชื่อ KPI",
+            "kpi_goal": "เป้าหมาย",
+            "point_value": "คะแนน",
+            "dept_name": "ทีม"
+        })
+
+        df_all = df_all.sort_values(by=["ทีม", "type", "ชื่อ KPI"])
+
+        # แสดงแบบกลุ่มตามแผนก
+        for team_name, group_df in df_all.groupby("ทีม"):
+            st.markdown(f"### 🏢 ทีม: {team_name}")
+            st.dataframe(
+                group_df[["type", "ชื่อผู้รับผิดชอบ", "ชื่อ KPI", "เป้าหมาย", "คะแนน"]],
+                use_container_width=True
+            )
 

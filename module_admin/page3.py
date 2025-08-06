@@ -6,6 +6,7 @@ from db import get_connection_app
 
 def admin_page3():
     st.title("⚙️ จัดการ Point")
+    st.write('------')
 
     action = ["เพิ่ม Point ส่วนตัว", "เพิ่ม Point ทีม"]
     st.sidebar.header("🔎 ตัวกรองข้อมูล")
