@@ -45,7 +45,7 @@ def main_user():
 def main_admin():
     
     with st.sidebar:
-        selected = option_menu("Admin Menu", ["View point", 'Edit user','Edit point','Check REQ','Manage KPI'],
+        selected = option_menu("Admin Menu", ["View point", 'Edit user','Edit point','View requirement','Manage KPI & Award'],
             icons=['bar-chart', 'file-earmark-text', 'gear', 'check-circle',"flag"], menu_icon="tools", default_index=0)
 
 
@@ -55,9 +55,9 @@ def main_admin():
         admin_page2.admin_page2()
     elif selected == 'Edit point': # Edit point
         admin_page3.admin_page3()
-    elif selected == 'Check REQ': # Checking  
+    elif selected == 'View requirement': # Checking  
         admin_page4.admin_page4()
-    elif selected == 'Manage KPI': # Manage KPI
+    elif selected == 'Manage KPI & Award': # Manage KPI
         admin_page5.admin_page5()
 
 
