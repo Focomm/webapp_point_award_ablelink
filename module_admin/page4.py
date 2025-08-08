@@ -11,7 +11,7 @@ from db import get_connection_app
 def admin_page4():
     action = ["Req get point", "Req use point", "History get point","History use point"]
 
-    st.sidebar.header("🔎 ตัวกรองข้อมูล")
+    st.sidebar.header("การดำเนินการ")
     selected_action = st.sidebar.selectbox("เลือกการจัดการ", action)
 
     if selected_action == "Req get point":
@@ -19,8 +19,8 @@ def admin_page4():
         st.write("------")
 
         # เลือกประเภทคำร้อง
-        request_type = st.radio("เลือกประเภทคำร้อง", ("ส่วนบุคคล", "ทีม"))
-        st.write("------")
+        # request_type = st.radio("เลือกประเภทคำร้อง", ("ส่วนบุคคล", "ทีม"))
+        request_type = ui.tabs(options=['ส่วนบุคคล', 'ทีม'], default_value='ส่วนบุคคล', key="kanaries")
 
         conn = get_connection_app()
 
@@ -53,7 +53,7 @@ def admin_page4():
                 st.info("✅ ยังไม่มีคำร้องส่วนบุคคล")
             else:
                 for row in rows:
-                    col1, col2 = st.columns([1, 12])
+                    col1, col2 = st.columns([0.5, 15])
                     with col1:
                         st.checkbox("เลือก", key=f"select_{row.id}", label_visibility="collapsed")
                     with col2:
@@ -81,7 +81,10 @@ def admin_page4():
                                 st.markdown("📭 ไม่มีไฟล์แนบ")
 
                 selected_rows = [row for row in rows if st.session_state.get(f"select_{row.id}", False)]
-                if st.button("📤 Submit คำร้องที่เลือก (ส่วนบุคคล)"):
+                
+                submit_personal = ui.button("Submit คำร้องที่เลือก (ส่วนบุคคล)", key="add_point", variant="default")
+
+                if submit_personal:
                     if not selected_rows:
                         st.warning("⚠️ กรุณาเลือกคำร้อง")
                     else:
@@ -169,7 +172,7 @@ def admin_page4():
                 st.info("✅ ยังไม่มีคำร้องของทีม")
             else:
                 for row in rows:
-                    col1, col2 = st.columns([1, 12])
+                    col1, col2 = st.columns([0.5, 15])
                     with col1:
                         st.checkbox("เลือก", key=f"select_team_{row.id}", label_visibility="collapsed")
                     with col2:
@@ -196,7 +199,10 @@ def admin_page4():
                                 st.markdown("📭 ไม่มีไฟล์แนบ")
 
                 selected_rows = [row for row in rows if st.session_state.get(f"select_team_{row.id}", False)]
-                if st.button("📤 Submit คำร้องที่เลือก (ทีม)"):
+                
+                submit_team = ui.button("Submit คำร้องที่เลือก (ทีม)", key="add_point", variant="default")
+
+                if submit_team:
                     if not selected_rows:
                         st.warning("⚠️ กรุณาเลือกคำร้อง")
                     else:
@@ -259,7 +265,8 @@ def admin_page4():
         st.write("------")
 
         # ✅ เลือกประเภทคำร้อง
-        request_type = st.radio("เลือกประเภทคำร้อง", ("ส่วนบุคคล", "ทีม"))
+        # request_type = st.radio("เลือกประเภทคำร้อง", ("ส่วนบุคคล", "ทีม"))
+        request_type = ui.tabs(options=['ส่วนบุคคล', 'ทีม'], default_value='ส่วนบุคคล', key="kanaries")
         requester_type = "user" if request_type == "ส่วนบุคคล" else "team"
 
         try:
@@ -287,7 +294,7 @@ def admin_page4():
                 st.info(f"✅ ยังไม่มีคำขอแลก Point{'ส่วนบุคคล' if requester_type == 'user' else 'ทีม'}")
             else:
                 for row in rows:
-                    col1, col2 = st.columns([1, 12])
+                    col1, col2 = st.columns([0.5, 15])
 
                     with col1:
                         st.checkbox("เลือก", key=f"approve_req_{row.id}", label_visibility="collapsed")
@@ -305,7 +312,9 @@ def admin_page4():
 
                 selected_rows = [row for row in rows if st.session_state.get(f"approve_req_{row.id}", False)]
 
-                if st.button("✅ อนุมัติคำขอที่เลือก"):
+                submit = ui.button("อนุมัติคำขอที่เลือก", key="add_point", variant="default")
+
+                if submit:
                     if not selected_rows:
                         st.warning("⚠️ กรุณาเลือกคำขออย่างน้อย 1 รายการ")
                     else:

@@ -7,7 +7,7 @@ from db import get_connection_app
 
 def admin_page5():
     action = ["Add KPI","Delete KPI", "Manage Award", "View KPI ALL"]
-    st.sidebar.header("🔎 ตัวกรองข้อมูล")
+    st.sidebar.header("การดำเนินการ")
     selected_KPI = st.sidebar.selectbox("เลือกการจัดการ", action)
     
     
@@ -19,7 +19,8 @@ def admin_page5():
             conn = get_connection_app()
 
             # เลือกประเภท KPI
-            kpi_type = st.radio("เลือกประเภท KPI", ("ส่วนบุคคล", "ทีม"))
+            # kpi_type = st.radio("เลือกประเภท KPI", ("ส่วนบุคคล", "ทีม"))
+            kpi_type = ui.tabs(options=['ส่วนบุคคล', 'ทีม'], default_value='ส่วนบุคคล', key="kanaries")
 
             if kpi_type == "ส่วนบุคคล":
                 # ดึงรายชื่อผู้ใช้
@@ -120,7 +121,8 @@ def admin_page5():
         try:
             conn = get_connection_app()
 
-            kpi_type = st.radio("เลือกประเภท KPI ที่ต้องการลบ", ("ส่วนบุคคล", "ทีม"))
+            # kpi_type = st.radio("เลือกประเภท KPI ที่ต้องการลบ", ("ส่วนบุคคล", "ทีม"))
+            kpi_type = ui.tabs(options=['ส่วนบุคคล', 'ทีม'], default_value='ส่วนบุคคล', key="kanaries")
 
             if kpi_type == "ส่วนบุคคล":
                 # ดึง KPI ส่วนบุคคล
@@ -204,7 +206,8 @@ def admin_page5():
 
             # --- ส่วนเพิ่มรางวัล ---
             st.subheader("➕ เพิ่มรางวัลใหม่")
-            reward_type = st.radio("🎯 ประเภทของรางวัล", ("user", "team"), key="reward_type_add")
+            # reward_type = st.radio("🎯 ประเภทของรางวัล", ("user", "team"), key="reward_type_add")
+            reward_type = ui.tabs(options=['ส่วนบุคคล', 'ทีม'], default_value='ส่วนบุคคล', key="kanaries")
             reward_name = st.text_input("🏅 ชื่อรางวัล", key="reward_name_add")
             reward_point = st.number_input("🎁 Point ที่ใช้แลก", min_value=1, step=1, key="reward_point_add")
 

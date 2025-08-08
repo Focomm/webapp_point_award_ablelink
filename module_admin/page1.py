@@ -73,10 +73,12 @@ def admin_page1():
             ui.metric_card(title="Team Point", content=int(total_dpmt), description="คะแนนแผนก", key="card2")
 
         st.markdown("### 👥 รายชื่อพนักงาน")
-        st.dataframe(
-            filtered_df[['full_name', 'nickname', 'dept_name', 'point_value']],
-            use_container_width=True
-        )
+        # st.dataframe(
+        #     filtered_df[['full_name', 'nickname', 'dept_name', 'point_value']],
+        #     use_container_width=True
+        # )
+        
+        ui.table(data=filtered_df[['full_name', 'nickname', 'dept_name', 'point_value']],maxHeight=300)
 
     except Exception as e:
         st.error(f"❌ โหลดข้อมูลล้มเหลว: {e}")

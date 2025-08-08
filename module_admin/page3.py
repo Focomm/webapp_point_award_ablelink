@@ -9,7 +9,7 @@ def admin_page3():
     st.write('------')
 
     action = ["เพิ่ม Point ส่วนตัว", "เพิ่ม Point ทีม"]
-    st.sidebar.header("🔎 ตัวกรองข้อมูล")
+    st.sidebar.header("การดำเนินการ")
     selected_dept = st.sidebar.selectbox("เลือกการจัดการ", action)
 
     try:
@@ -54,34 +54,37 @@ def admin_page3():
                 ui.metric_card(title="Point หลังจากลด", content=int(max(0, current_point - point_input)), description="หากลดคะแนน", key="card3")
 
             col1, col2, col3 = st.columns(3)
-
-            if col2.button("➕ เพิ่ม Point"):
-                try:
-                    conn.execute(text("""
-                        UPDATE kpigoalpoint.personal_points
-                        SET point_value = point_value + :point
-                        WHERE user_ref_id = :uid
-                    """), {"point": point_input, "uid": selected_user_id})
-                    conn.commit()
-                    st.success(f"✅ เพิ่ม {point_input} คะแนนให้ {selected_display} สำเร็จแล้ว")
-                    st.rerun()
-                except Exception as e:
-                    conn.rollback()
-                    st.error(f"❌ เพิ่มคะแนนไม่สำเร็จ: {e}")
-
-            if col3.button("➖ ลด Point"):
-                try:
-                    conn.execute(text("""
-                        UPDATE kpigoalpoint.personal_points
-                        SET point_value = GREATEST(0, point_value - :point)
-                        WHERE user_ref_id = :uid
-                    """), {"point": point_input, "uid": selected_user_id})
-                    conn.commit()
-                    st.success(f"✅ ลด {point_input} คะแนนของ {selected_display} สำเร็จแล้ว")
-                    st.rerun()
-                except Exception as e:
-                    conn.rollback()
-                    st.error(f"❌ ลดคะแนนไม่สำเร็จ: {e}")
+            
+            with col2:
+                add_point = ui.button("เพิ่ม Point", key="add_point", variant="default")
+                if add_point:
+                    try:
+                        conn.execute(text("""
+                            UPDATE kpigoalpoint.personal_points
+                            SET point_value = point_value + :point
+                            WHERE user_ref_id = :uid
+                        """), {"point": point_input, "uid": selected_user_id})
+                        conn.commit()
+                        st.success(f"✅ เพิ่ม {point_input} คะแนนให้ {selected_display} สำเร็จแล้ว")
+                        st.rerun()
+                    except Exception as e:
+                        conn.rollback()
+                        st.error(f"❌ เพิ่มคะแนนไม่สำเร็จ: {e}")
+            with col3:
+                reduce_point = ui.button("ลด Point", key="reduce_point", variant="destructive")
+                if reduce_point:
+                    try:
+                        conn.execute(text("""
+                            UPDATE kpigoalpoint.personal_points
+                            SET point_value = GREATEST(0, point_value - :point)
+                            WHERE user_ref_id = :uid
+                        """), {"point": point_input, "uid": selected_user_id})
+                        conn.commit()
+                        st.success(f"✅ ลด {point_input} คะแนนของ {selected_display} สำเร็จแล้ว")
+                        st.rerun()
+                    except Exception as e:
+                        conn.rollback()
+                        st.error(f"❌ ลดคะแนนไม่สำเร็จ: {e}")
 
         elif selected_dept == "เพิ่ม Point ทีม":
             st.markdown("### เพิ่ม/ลด Point รายแผนก")
@@ -110,33 +113,38 @@ def admin_page3():
 
             col1, col2, col3 = st.columns(3)
 
-            if col2.button("➕ เพิ่ม Point ทีม"):
-                try:
-                    conn.execute(text("""
-                        UPDATE kpigoalpoint.departments
-                        SET point_dpmt = point_dpmt + :point
-                        WHERE id = :dept_id
-                    """), {"point": point_input, "dept_id": selected_dept_id})
-                    conn.commit()
-                    st.success(f"✅ เพิ่ม {point_input} คะแนนให้ทีม {selected_dept_name} สำเร็จแล้ว")
-                    st.rerun()
-                except Exception as e:
-                    conn.rollback()
-                    st.error(f"❌ เพิ่มคะแนนทีมไม่สำเร็จ: {e}")
 
-            if col3.button("➖ ลด Point ทีม"):
-                try:
-                    conn.execute(text("""
-                        UPDATE kpigoalpoint.departments
-                        SET point_dpmt = GREATEST(0, point_dpmt - :point)
-                        WHERE id = :dept_id
-                    """), {"point": point_input, "dept_id": selected_dept_id})
-                    conn.commit()
-                    st.success(f"✅ ลด {point_input} คะแนนของทีม {selected_dept_name} สำเร็จแล้ว")
-                    st.rerun()
-                except Exception as e:
-                    conn.rollback()
-                    st.error(f"❌ ลดคะแนนทีมไม่สำเร็จ: {e}")
+            with col2:
+                add_point = ui.button("เพิ่ม Point", key="add_point", variant="default")
+                if add_point:
+                    try:
+                        conn.execute(text("""
+                            UPDATE kpigoalpoint.departments
+                            SET point_dpmt = point_dpmt + :point
+                            WHERE id = :dept_id
+                        """), {"point": point_input, "dept_id": selected_dept_id})
+                        conn.commit()
+                        st.success(f"✅ เพิ่ม {point_input} คะแนนให้ทีม {selected_dept_name} สำเร็จแล้ว")
+                        st.rerun()
+                    except Exception as e:
+                        conn.rollback()
+                        st.error(f"❌ เพิ่มคะแนนทีมไม่สำเร็จ: {e}")
+
+            with col3:
+                reduce_point = ui.button("ลด Point", key="reduce_point", variant="destructive")
+                if reduce_point:
+                    try:
+                        conn.execute(text("""
+                            UPDATE kpigoalpoint.departments
+                            SET point_dpmt = GREATEST(0, point_dpmt - :point)
+                            WHERE id = :dept_id
+                        """), {"point": point_input, "dept_id": selected_dept_id})
+                        conn.commit()
+                        st.success(f"✅ ลด {point_input} คะแนนของทีม {selected_dept_name} สำเร็จแล้ว")
+                        st.rerun()
+                    except Exception as e:
+                        conn.rollback()
+                        st.error(f"❌ ลดคะแนนทีมไม่สำเร็จ: {e}")
 
     except Exception as e:
         st.error(f"❌ โหลดข้อมูลล้มเหลว: {e}")

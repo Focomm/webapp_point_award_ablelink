@@ -31,6 +31,7 @@ page = st.query_params.get("page", "login")
 def main_user():
     
     with st.sidebar:
+        
         selected = option_menu("User Menu", ["Your self", 'Manage point', 'Get Point'],
             icons=['house', 'receipt', 'star'], menu_icon="cast", default_index=0)
 
@@ -41,14 +42,20 @@ def main_user():
     elif selected == 'Get Point':
         user_page3.user_page3()
 
-
 def main_admin():
     
     with st.sidebar:
+        
+        st.markdown("""<div style='margin-top: 0px;'></div>""", unsafe_allow_html=True)
+        st.markdown("""
+            <div style='text-align: center; color: gray; font-size: 12px; margin-bottom: 15px;'>
+                Made by IceSu <br>Beta 1.0.1
+            </div>
+        """, unsafe_allow_html=True)
+        
         selected = option_menu("Admin Menu", ["View point", 'Edit user','Edit point','View requirement','Manage KPI & Award'],
             icons=['bar-chart', 'file-earmark-text', 'gear', 'check-circle',"flag"], menu_icon="tools", default_index=0)
-
-
+        
     if selected == 'View point': # View all points
         admin_page1.admin_page1()
     elif selected == 'Edit user': # Edit user
@@ -59,7 +66,6 @@ def main_admin():
         admin_page4.admin_page4()
     elif selected == 'Manage KPI & Award': # Manage KPI
         admin_page5.admin_page5()
-
 
 # 🚪 ตัดสินใจว่าจะแสดงหน้าอะไร
 if st.session_state.authenticated and st.session_state.user_role:

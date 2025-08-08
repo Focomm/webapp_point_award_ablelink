@@ -9,7 +9,7 @@ def admin_page2():
     st.title("👤 จัดการผู้ใช้งาน")
 
     action = ["เพิ่มผู้ใช้", "แก้ไขผู้ใช้", "ลบผู้ใช้"]
-    st.sidebar.header("🔎 ตัวกรองข้อมูล")
+    st.sidebar.header("การดำเนินการ")
     selected_dept = st.sidebar.selectbox("เลือกการจัดการ", action)
     st.markdown("---")
 
@@ -23,7 +23,6 @@ def admin_page2():
             dept_selected = st.selectbox("เลือกแผนก", list(dept_options.keys()))
             dept_id = dept_options[dept_selected]
             st.write('------')
-
 
             user_id = st.text_input("User ID")
             col1, col2 = st.columns(2)
@@ -39,7 +38,13 @@ def admin_page2():
             role = st.selectbox("บทบบาท", ["user", "admin"])
             role_position = st.text_input("ตำแหน่ง (ถ้ามี)")
 
-            if st.button("✅ เพิ่มผู้ใช้"):
+            add_user_button = ui.button(
+                text="เพิ่มผู้ใช้",
+                key="add_user_button",
+                variant="default"  # ทำให้ปุ่มเป็นสีแดง
+            )
+
+            if add_user_button:
                 if not user_id or not full_name or not nickname:
                     st.warning("⚠️ กรุณากรอก user_id, ชื่อ-นามสกุล และชื่อเล่น")
                     return
@@ -131,7 +136,13 @@ def admin_page2():
                 dept_selected = st.selectbox("แผนก", list(dept_options.keys()), index=list(dept_options.values()).index(row[6]))
                 dept_id = dept_options[dept_selected]
 
-                if st.button("💾 บันทึกการเปลี่ยนแปลง"):
+                save_edit = ui.button(
+                    text="บันทึกการเปลี่ยนแปลง",
+                    key="save_edit",
+                    variant="default"  # ทำให้ปุ่มเป็นสีแดง
+                )
+
+                if save_edit:
                     try:
                         conn.execute(text("""
                             UPDATE kpigoalpoint.users SET
@@ -182,7 +193,10 @@ def admin_page2():
                 st.warning("⚠️ ไม่สามารถลบผู้ใช้นี้ได้ เพราะมีข้อมูลคะแนนอยู่ในระบบ")
             else:
                 confirm_1 = st.checkbox(f"คุณแน่ใจหรือไม่ว่าจะลบ '{selected_display}'?", key="confirm1")
-                if st.button("✅ ยืนยันการลบ", key="delete_user"):
+
+                confirm_delete = ui.button("ยืนยันการลบ", key="delete_user", variant="destructive")
+
+                if confirm_delete:
                     if confirm_1:
                         try:
                             conn.execute(text("DELETE FROM kpigoalpoint.auth_credentials WHERE user_id = :uid"), {"uid": selected_user_id})
