@@ -50,7 +50,7 @@ def main_admin():
         st.markdown("""<div style='margin-top: 0px;'></div>""", unsafe_allow_html=True)
         st.markdown("""
             <div style='text-align: center; color: gray; font-size: 12px; margin-bottom: 15px;'>
-                Made by IceSu <br>Beta 1.0.1
+                Made by IceSu <br>Beta 1.0.2
             </div>
         """, unsafe_allow_html=True)
         
