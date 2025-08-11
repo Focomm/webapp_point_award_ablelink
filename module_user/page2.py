@@ -280,7 +280,7 @@ def user_page2():
             if 'conn' in locals():
                 conn.close()
 
-                
+    
     elif selected_dept == "ประวัติการใช้งาน point":
         st.title("📜 ประวัติการแลก Point")
         st.write("------")
@@ -306,7 +306,7 @@ def user_page2():
 
             dept_id = str(dept_row.dept_id)
 
-            # ✅ ดึงประวัติส่วนตัวเป็น DataFrame
+            # ✅ ดึงประวัติส่วนตัว
             df_personal = pd.read_sql(text("""
                 SELECT r.id AS "รหัสคำขอ",
                     rw.reward_name AS "รางวัล",
@@ -319,7 +319,7 @@ def user_page2():
                 ORDER BY r.upload_time DESC
             """), conn, params={"user_id": user_id})
 
-            # ✅ ดึงประวัติทีมเป็น DataFrame
+            # ✅ ดึงประวัติทีม
             df_team = pd.read_sql(text("""
                 SELECT r.id AS "รหัสคำขอ",
                     rw.reward_name AS "รางวัล",
@@ -332,20 +332,19 @@ def user_page2():
                 ORDER BY r.upload_time DESC
             """), conn, params={"dept_id": dept_id})
 
-            # === แปลงเวลาทั้งสอง DataFrame เป็น string เพื่อ JSON serialize ===
-            for df in [df_personal, df_team]:
-                if "เวลาส่งคำขอ" in df.columns:
-                    df["เวลาส่งคำขอ"] = pd.to_datetime(df["เวลาส่งคำขอ"], errors="coerce").dt.strftime("%Y-%m-%d %H:%M")
-                df = df.astype(object).where(pd.notnull(df), None)
+            # === ทำความสะอาด DataFrame ทั้งสองให้ส่งเข้า ui.table() ได้ ===
+            for target_df in [df_personal, df_team]:
+                if "เวลาส่งคำขอ" in target_df.columns:
+                    target_df["เวลาส่งคำขอ"] = pd.to_datetime(target_df["เวลาส่งคำขอ"], errors="coerce").dt.strftime("%Y-%m-%d %H:%M")
+                target_df[:] = target_df.astype(object).where(pd.notnull(target_df), None)
 
-            # ✅ แสดงประวัติส่วนตัว
+            # === แสดงผล ===
             st.subheader("🙋‍♂️ ประวัติการแลกรางวัลส่วนตัว")
             if df_personal.empty:
                 st.info("📭 ยังไม่มีการแลกรางวัลส่วนตัว")
             else:
                 ui.table(df_personal, maxHeight=300)
 
-            # ✅ แสดงประวัติทีม
             st.subheader("🤝 ประวัติการแลกรางวัลทีม")
             if df_team.empty:
                 st.info("📭 ยังไม่มีการแลกรางวัลของทีม")
@@ -358,3 +357,4 @@ def user_page2():
         finally:
             if 'conn' in locals():
                 conn.close()
+                
