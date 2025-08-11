@@ -2,6 +2,7 @@ import streamlit as st
 import streamlit_shadcn_ui as ui
 import os
 import pandas as pd
+import time
 
 from datetime import datetime
 from sqlalchemy import create_engine, text
@@ -112,6 +113,8 @@ def user_page3():
                   if message:
                      st.success("✅ บันทึกข้อความสำเร็จ")
                   st.success("📬 ส่งข้อมูลเรียบร้อยแล้ว")
+                  time.sleep(2)  # ให้เวลาในการแสดงผลก่อน rerun
+                  st.rerun()  # รีเฟรชหน้าเพื่อแสดงผลที่อัปเดต
 
             except Exception as e:
                   st.error(f"❌ เกิดข้อผิดพลาดในการส่งข้อมูล: {e}")
@@ -226,6 +229,8 @@ def user_page3():
                   if message:
                      st.success("✅ บันทึกข้อความสำเร็จ")
                   st.success("📬 ส่งข้อมูลเรียบร้อยแล้ว")
+                  time.sleep(2)  # ให้เวลาในการแสดงผลก่อน rerun
+                  st.rerun()  # รีเฟรชหน้าเพื่อแสดงผลที่อัปเดต
 
             except Exception as e:
                   st.error(f"❌ เกิดข้อผิดพลาดในการส่งข้อมูล: {e}")
@@ -234,29 +239,39 @@ def user_page3():
    elif select_option == "ประวัติขอการ Point":
       st.title("📜 ประวัติการขอ Point")
 
+      
       try:
          conn = get_connection_app()
          query = text("""
-               SELECT 
+            SELECT 
                   fm.original_name, 
                   fm.message, 
                   fm.upload_time, 
                   fm.status,
                   kp.kpi_name
-               FROM kpigoalpoint.file_messages_personal fm
-               LEFT JOIN kpigoalpoint.kpi_personal kp ON fm.kpi_id = kp.id
-               WHERE fm.user_ref_id = :user_id
-               ORDER BY fm.upload_time DESC
+            FROM kpigoalpoint.file_messages_personal fm
+            LEFT JOIN kpigoalpoint.kpi_personal kp ON fm.kpi_id = kp.id
+            WHERE fm.user_ref_id = :user_id
+            ORDER BY fm.upload_time DESC
          """)
          result = conn.execute(query, {"user_id": str(user_id)})
          df = pd.DataFrame(result.fetchall(), columns=["ไฟล์", "ข้อความ", "เวลา", "สถานะ", "KPI ร้องขอ"])
 
          if df.empty:
-               st.info("🔍 ยังไม่มีรายการคำขอจากคุณ")
+            st.info("🔍 ยังไม่มีรายการคำขอจากคุณ")
          else:
-               st.dataframe(df, use_container_width=True)
+            # แปลง datetime ให้เป็น string
+            if "เวลา" in df.columns:
+                  df["เวลา"] = pd.to_datetime(df["เวลา"], errors="coerce").dt.strftime("%Y-%m-%d %H:%M")
 
-         conn.close()
+            # แปลง NaN เป็น None
+            df = df.astype(object).where(pd.notnull(df), None)
+
+            ui.table(df, maxHeight=300)
 
       except Exception as e:
          st.error(f"❌ เกิดข้อผิดพลาดในการโหลดข้อมูล: {e}")
+
+      finally:
+         if 'conn' in locals():
+            conn.close()

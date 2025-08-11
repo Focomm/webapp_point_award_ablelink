@@ -74,7 +74,7 @@ def admin_page5():
                     st.warning("⚠️ ยังไม่มีแผนกในระบบ กรุณาเพิ่มแผนกก่อนสร้าง KPI")
                 else:
                     dept_dict = {f"{row.dept_name}": row.id for row in departments}
-                    selected_dept_display = st.selectbox("🏢 เลือกแผนก", list(dept_dict.keys()))
+                    selected_dept_display = st.selectbox("เลือกแผนก", list(dept_dict.keys()))
                     selected_dept_id = dept_dict[selected_dept_display]
 
                     st.write('------')
@@ -329,9 +329,13 @@ def admin_page5():
 
         # แสดงแบบกลุ่มตามแผนก
         for team_name, group_df in df_all.groupby("ทีม"):
-            st.markdown(f"### 🏢 ทีม: {team_name}")
-            st.dataframe(
-                group_df[["type", "ชื่อผู้รับผิดชอบ", "ชื่อ KPI", "เป้าหมาย", "คะแนน"]],
-                use_container_width=True
-            )
+            st.markdown(f"### ทีม: {team_name}")
+            ui.table(
+                    group_df[["type", "ชื่อผู้รับผิดชอบ", "ชื่อ KPI", "เป้าหมาย", "คะแนน"]],
+                    maxHeight=300
+                )
+            # st.dataframe(
+            #     group_df[["type", "ชื่อผู้รับผิดชอบ", "ชื่อ KPI", "เป้าหมาย", "คะแนน"]],
+            #     use_container_width=True
+            # )
 

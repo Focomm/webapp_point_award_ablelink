@@ -4,6 +4,7 @@ import os
 import shutil
 import datetime
 import pandas as pd   
+import time 
 
 from sqlalchemy import text
 from db import get_connection_app
@@ -139,6 +140,8 @@ def admin_page4():
                                     """), {"id": row.id})
 
                                 st.success(f"✅ อัปเดตคำร้องของ {row.full_name} แล้ว")
+                                time.sleep(2)  # ให้เวลาในการแสดงผลก่อน rerun
+                                st.rerun()  # รีเฟรชหน้าเพื่อแสดงผลที่อัปเดต
                             except Exception as e:
                                 st.error(f"❌ {row.full_name}: {e}")
                         conn.commit()
@@ -255,6 +258,8 @@ def admin_page4():
                                     """), {"id": row.id})
 
                                 st.success(f"✅ อัปเดตคำร้องของแผนก {row.dept_name} แล้ว")
+                                time.sleep(2)  # ให้เวลาในการแสดงผลก่อน rerun
+                                st.rerun()  # รีเฟรชหน้าเพื่อแสดงผลที่อัปเดต
                             except Exception as e:
                                 st.error(f"❌ {row.dept_name}: {e}")
                         conn.commit()
@@ -329,6 +334,7 @@ def admin_page4():
 
                             conn.commit()
                             st.success("✅ อนุมัติคำขอที่เลือกเรียบร้อยแล้ว")
+                            time.sleep(2)  # ให้เวลาในการแสดงผลก่อน rerun
                             st.rerun()
                         except Exception as e:
                             conn.rollback()
@@ -389,18 +395,31 @@ def admin_page4():
             "type": "ประเภท"
         })
 
+        # --- จัดชนิดเวลาให้เป็น datetime แล้วแปลงเป็น string เพื่อส่งเข้า ui.table ---
+        if not df_all.empty:
+            # เผื่อ DB คืนมาเป็น string ให้บังคับ parse ก่อน
+            df_all["เวลาอัปโหลด"] = pd.to_datetime(df_all["เวลาอัปโหลด"], errors="coerce")
+
         df_all = df_all.sort_values(by=["ทีม", "เวลาอัปโหลด"], ascending=[True, False])
 
-        # === แสดงผลแยกตามทีม ===
-        for team_name, group_df in df_all.groupby("ทีม"):
-            st.markdown(f"### 🏢 ทีม: {team_name}")
-            st.dataframe(
-                group_df[["ประเภท", "ผู้ร้องขอ", "ข้อความ", "ชื่อไฟล์", "เวลาอัปโหลด"]],
-                use_container_width=True
-            )
+        # === แสดงผลแยกตามทีม ด้วย ui.table() ===
+        cols = ["ประเภท", "ผู้ร้องขอ", "ข้อความ", "ชื่อไฟล์", "เวลาอัปโหลด"]
 
-    
-    if selected_action == "History use point":
+        if df_all.empty:
+            st.info("📭 ยังไม่มีประวัติคำร้องสถานะ 'done'")
+        else:
+            for team_name, group_df in df_all.groupby("ทีม", sort=False):
+                st.markdown(f"### ทีม: {team_name}")
+                display_df = group_df[cols].copy()
+                # แปลง datetime เป็น string
+                if "เวลาอัปโหลด" in display_df.columns:
+                    display_df["เวลาอัปโหลด"] = pd.to_datetime(display_df["เวลาอัปโหลด"], errors="coerce").dt.strftime("%Y-%m-%d %H:%M")
+                # แปลง NaN เป็น None
+                display_df = display_df.astype(object).where(pd.notnull(display_df), None)
+                # ส่ง DataFrame ตรงๆ ให้ ui.table
+                ui.table(display_df, maxHeight=300)
+
+    elif selected_action == "History use point":
         
         st.title("📜 ประวัติการอนุมัติคำขอแลก Point")
         st.write('------')
@@ -451,13 +470,21 @@ def admin_page4():
             "type": "ประเภท"
         })
 
+        # แปลงคอลัมน์เวลาให้เป็น datetime แล้วเป็น string
+        if "เวลาอนุมัติ" in df_all.columns:
+            df_all["เวลาอนุมัติ"] = pd.to_datetime(df_all["เวลาอนุมัติ"], errors="coerce").dt.strftime("%Y-%m-%d %H:%M")
+        # แปลง NaN เป็น None เพื่อให้ serialize ได้
+        df_all = df_all.astype(object).where(pd.notnull(df_all), None)
+        # เรียงข้อมูล
         df_all = df_all.sort_values(by=["ทีม", "เวลาอนุมัติ"], ascending=[True, False])
-
-        # === แสดงผลแยกตามทีม ===
-        for team_name, group_df in df_all.groupby("ทีม"):
-            st.markdown(f"### 🏢 ทีม: {team_name}")
-            st.dataframe(
-                group_df[["ประเภท", "ผู้ร้องขอ", "ของรางวัล", "แต้มที่ใช้", "เวลาอนุมัติ"]],
-                use_container_width=True
-            )
-
+        cols = ["ประเภท", "ผู้ร้องขอ", "ของรางวัล", "แต้มที่ใช้", "เวลาอนุมัติ"]
+        # === แสดงผลแยกตามทีม ด้วย ui.table() ===
+        if df_all.empty:
+            st.info("📭 ยังไม่มีประวัติคำขออนุมัติ")
+        else:
+            for team_name, group_df in df_all.groupby("ทีม", sort=False):
+                st.markdown(f"### ทีม: {team_name}")
+                ui.table(
+                    group_df[cols],
+                    maxHeight=300
+                )

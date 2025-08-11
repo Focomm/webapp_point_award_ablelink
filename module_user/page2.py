@@ -1,6 +1,8 @@
 import streamlit as st
 import streamlit_shadcn_ui as ui
 import pandas as pd
+import time
+
 from db import get_connection_app
 from sqlalchemy import text
 
@@ -15,26 +17,24 @@ def user_page2():
         user_id = st.session_state.get("user_id")
         if not user_id:
             st.error("❌ ไม่พบ user_id ใน session")
-            return
+            st.stop()
 
         try:
-            conn = get_connection_app()
+            # 🔹 ใช้ connection แรกสำหรับอ่านข้อมูล
+            with get_connection_app() as conn_read:
+                result = conn_read.execute(text("""
+                    SELECT point_value FROM kpigoalpoint.personal_points
+                    WHERE user_ref_id = :uid
+                """), {"uid": user_id})
+                row = result.fetchone()
+                current_point = int(row[0]) if row and row[0] is not None else 0
 
-            # ดึง point ของตัวเอง
-            result = conn.execute(text("""
-                SELECT point_value FROM kpigoalpoint.personal_points
-                WHERE user_ref_id = :uid
-            """), {"uid": user_id})
-            row = result.fetchone()
-            current_point = int(row[0]) if row and row[0] is not None else 0
-
-            # ดึงรายชื่อผู้ใช้อื่น (ไม่รวมตัวเอง)
-            user_df = pd.read_sql(text("""
-                SELECT user_id, full_name, nickname
-                FROM kpigoalpoint.users
-                WHERE user_id != :uid
-                ORDER BY full_name
-            """), conn, params={"uid": user_id})
+                user_df = pd.read_sql(text("""
+                    SELECT user_id, full_name, nickname
+                    FROM kpigoalpoint.users
+                    WHERE user_id != :uid
+                    ORDER BY full_name
+                """), conn_read, params={"uid": user_id})
 
             user_map = {
                 f"{row['full_name']} ({row['nickname']})": row['user_id']
@@ -44,7 +44,6 @@ def user_page2():
             recipient_display = st.selectbox("👥 เลือกผู้รับ Point", list(user_map.keys()))
             recipient_user_id = user_map[recipient_display]
 
-            # จำนวน point ที่ต้องการโอน
             point_input = st.number_input("📤 จำนวน Point ที่ต้องการโอน", min_value=1, step=1)
 
             col_preview1, col_preview2 = st.columns(2)
@@ -58,18 +57,20 @@ def user_page2():
                     st.warning("⚠️ คุณมี Point ไม่เพียงพอสำหรับการโอนนี้")
                 else:
                     try:
-                        with conn.begin():
-                            conn.execute(text("""
-                                UPDATE kpigoalpoint.personal_points
-                                SET point_value = point_value - :amount
-                                WHERE user_ref_id = :uid
-                            """), {"amount": point_input, "uid": user_id})
+                        # 🔹 เปิด connection ใหม่แล้วค่อย begin transaction
+                        with get_connection_app() as conn_write:
+                            with conn_write.begin():
+                                conn_write.execute(text("""
+                                    UPDATE kpigoalpoint.personal_points
+                                    SET point_value = point_value - :amount
+                                    WHERE user_ref_id = :uid
+                                """), {"amount": point_input, "uid": user_id})
 
-                            conn.execute(text("""
-                                UPDATE kpigoalpoint.personal_points
-                                SET point_value = point_value + :amount
-                                WHERE user_ref_id = :rid
-                            """), {"amount": point_input, "rid": recipient_user_id})
+                                conn_write.execute(text("""
+                                    UPDATE kpigoalpoint.personal_points
+                                    SET point_value = point_value + :amount
+                                    WHERE user_ref_id = :rid
+                                """), {"amount": point_input, "rid": recipient_user_id})
 
                         st.success(f"✅ โอน {point_input} Point ให้ {recipient_display} เรียบร้อยแล้ว")
                         st.rerun()
@@ -162,6 +163,7 @@ def user_page2():
 
                             conn.commit()
                             st.success("✅ ส่งคำขอแลก Point สำเร็จแล้ว")
+                            time.sleep(2)  # ให้เวลาในการแสดงผลก่อน rerun
                             st.rerun()
 
                         except Exception as e:
@@ -265,6 +267,7 @@ def user_page2():
 
                             conn.commit()
                             st.success("✅ ส่งคำขอแลก Point ทีมสำเร็จแล้ว")
+                            time.sleep(2)  # ให้เวลาในการแสดงผลก่อน rerun
                             st.rerun()
 
                         except Exception as e:
@@ -303,53 +306,55 @@ def user_page2():
 
             dept_id = str(dept_row.dept_id)
 
-            # ✅ ดึงประวัติส่วนตัว
-            result = conn.execute(text("""
-                SELECT r.id, rw.reward_name, rw.reward_point, r.status, r.upload_time
+            # ✅ ดึงประวัติส่วนตัวเป็น DataFrame
+            df_personal = pd.read_sql(text("""
+                SELECT r.id AS "รหัสคำขอ",
+                    rw.reward_name AS "รางวัล",
+                    rw.reward_point AS "แต้มที่ใช้",
+                    r.status AS "สถานะ",
+                    r.upload_time AS "เวลาส่งคำขอ"
                 FROM kpigoalpoint.req_user_team r
                 LEFT JOIN kpigoalpoint.reward rw ON r.reward_id = rw.id
                 WHERE r.requester_type = 'user' AND r.requester_ref_id = :user_id
                 ORDER BY r.upload_time DESC
-            """), {"user_id": user_id})
-            personal_history = result.fetchall()
+            """), conn, params={"user_id": user_id})
 
-            # ✅ ดึงประวัติทีม
-            result = conn.execute(text("""
-                SELECT r.id, rw.reward_name, rw.reward_point, r.status, r.upload_time
+            # ✅ ดึงประวัติทีมเป็น DataFrame
+            df_team = pd.read_sql(text("""
+                SELECT r.id AS "รหัสคำขอ",
+                    rw.reward_name AS "รางวัล",
+                    rw.reward_point AS "แต้มที่ใช้",
+                    r.status AS "สถานะ",
+                    r.upload_time AS "เวลาส่งคำขอ"
                 FROM kpigoalpoint.req_user_team r
                 LEFT JOIN kpigoalpoint.reward rw ON r.reward_id = rw.id
                 WHERE r.requester_type = 'team' AND r.requester_ref_id = :dept_id
                 ORDER BY r.upload_time DESC
-            """), {"dept_id": dept_id})
-            team_history = result.fetchall()
+            """), conn, params={"dept_id": dept_id})
 
-            # ✅ แสดงผล
+            # === แปลงเวลาทั้งสอง DataFrame เป็น string เพื่อ JSON serialize ===
+            for df in [df_personal, df_team]:
+                if "เวลาส่งคำขอ" in df.columns:
+                    df["เวลาส่งคำขอ"] = pd.to_datetime(df["เวลาส่งคำขอ"], errors="coerce").dt.strftime("%Y-%m-%d %H:%M")
+                df = df.astype(object).where(pd.notnull(df), None)
+
+            # ✅ แสดงประวัติส่วนตัว
             st.subheader("🙋‍♂️ ประวัติการแลกรางวัลส่วนตัว")
-            if not personal_history:
+            if df_personal.empty:
                 st.info("📭 ยังไม่มีการแลกรางวัลส่วนตัว")
             else:
-                st.table([{
-                    "รหัสคำขอ": row.id,
-                    "รางวัล": row.reward_name or "-",
-                    "แต้มที่ใช้": row.reward_point or "-",
-                    "สถานะ": row.status,
-                    "เวลาส่งคำขอ": row.upload_time.strftime("%Y-%m-%d %H:%M")
-                } for row in personal_history])
+                ui.table(df_personal, maxHeight=300)
 
+            # ✅ แสดงประวัติทีม
             st.subheader("🤝 ประวัติการแลกรางวัลทีม")
-            if not team_history:
+            if df_team.empty:
                 st.info("📭 ยังไม่มีการแลกรางวัลของทีม")
             else:
-                st.table([{
-                    "รหัสคำขอ": row.id,
-                    "รางวัล": row.reward_name or "-",
-                    "แต้มที่ใช้": row.reward_point or "-",
-                    "สถานะ": row.status,
-                    "เวลาส่งคำขอ": row.upload_time.strftime("%Y-%m-%d %H:%M")
-                } for row in team_history])
+                ui.table(df_team, maxHeight=300)
 
         except Exception as e:
             st.error(f"❌ ไม่สามารถโหลดประวัติได้: {e}")
+
         finally:
             if 'conn' in locals():
                 conn.close()

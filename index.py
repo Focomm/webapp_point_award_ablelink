@@ -11,7 +11,6 @@ import module_admin.page3 as admin_page3
 import module_admin.page4 as admin_page4
 import module_admin.page5 as admin_page5
 
-st.set_page_config(page_title="Goalpoint Focomm", layout="wide")
 
 
 if "authenticated" not in st.session_state:
@@ -29,7 +28,8 @@ if "redirect_to" in st.session_state:
 page = st.query_params.get("page", "login")
 
 def main_user():
-    
+    st.set_page_config(page_title="Goalpoint Focomm", layout="wide", page_icon="")
+
     with st.sidebar:
         
         selected = option_menu("User Menu", ["Your self", 'Manage point', 'Get Point'],
@@ -43,7 +43,8 @@ def main_user():
         user_page3.user_page3()
 
 def main_admin():
-    
+    st.set_page_config(page_title="Goalpoint Focomm", layout="wide", page_icon="")
+
     with st.sidebar:
         
         st.markdown("""<div style='margin-top: 0px;'></div>""", unsafe_allow_html=True)
@@ -77,4 +78,5 @@ if st.session_state.authenticated and st.session_state.user_role:
         st.error("⛔️ ไม่รู้ว่าจะไปหน้าไหน (page=?)")
 else:
     from login import login_page
+    st.set_page_config(page_title="Goalpoint Focomm")
     login_page()
