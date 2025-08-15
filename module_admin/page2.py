@@ -4,6 +4,7 @@ from db import get_connection_app
 from sqlalchemy import text
 import pandas as pd
 import bcrypt
+import time
 
 def admin_page2():
     st.title("👤 จัดการผู้ใช้งาน")
@@ -95,6 +96,8 @@ def admin_page2():
 
                     conn.commit()
                     st.success(f"✅ เพิ่มผู้ใช้ {user_id} และตั้งรหัสผ่านเรียบร้อยแล้ว")
+                    time.sleep(2)
+                    st.rerun()
 
                 except Exception as e:
                     conn.rollback()
@@ -189,25 +192,28 @@ def admin_page2():
             """), {"uid": selected_user_id})
             point_total = result.scalar()
 
+            
+       
+            confirm_1 = st.checkbox(f"คุณแน่ใจหรือไม่ว่าจะลบ '{selected_display}'?", key="confirm1")
+
+            confirm_delete = ui.button("ยืนยันการลบ", key="delete_user", variant="destructive")
+            # alert_text = ui.alert_dialog(show=confirm_delete, title="Alert Dialog", description="This is an alert dialog", confirm_label="OK", cancel_label="Cancel", key="alert_dialog_1")
             if point_total > 0:
-                st.warning("⚠️ ไม่สามารถลบผู้ใช้นี้ได้ เพราะมีข้อมูลคะแนนอยู่ในระบบ")
-            else:
-                confirm_1 = st.checkbox(f"คุณแน่ใจหรือไม่ว่าจะลบ '{selected_display}'?", key="confirm1")
-
-                confirm_delete = ui.button("ยืนยันการลบ", key="delete_user", variant="destructive")
-
-                if confirm_delete:
-                    if confirm_1:
-                        try:
-                            conn.execute(text("DELETE FROM kpigoalpoint.auth_credentials WHERE user_id = :uid"), {"uid": selected_user_id})
-                            conn.execute(text("DELETE FROM kpigoalpoint.personal_points WHERE user_ref_id = :uid"), {"uid": selected_user_id})
-                            conn.execute(text("DELETE FROM kpigoalpoint.users WHERE user_id = :uid"), {"uid": selected_user_id})
-                            conn.commit()
-                            st.success(f"✅ ลบผู้ใช้ {selected_display} เรียบร้อยแล้ว")
-                        except Exception as e:
-                            conn.rollback()
-                            st.error(f"❌ ลบไม่สำเร็จ: {e}")
-                    elif not confirm_1:
-                        st.warning("สติจ้า กรุณายืนยันการลบก่อน")
+                st.warning("ผู้ใช้มี Point อยู่ในระบบ")
+            if confirm_delete:
+                if confirm_1:
+                    try:
+                        conn.execute(text("DELETE FROM kpigoalpoint.auth_credentials WHERE user_id = :uid"), {"uid": selected_user_id})
+                        conn.execute(text("DELETE FROM kpigoalpoint.personal_points WHERE user_ref_id = :uid"), {"uid": selected_user_id})
+                        conn.execute(text("DELETE FROM kpigoalpoint.users WHERE user_id = :uid"), {"uid": selected_user_id})
+                        conn.commit()
+                        st.success(f"✅ ลบผู้ใช้ {selected_display} เรียบร้อยแล้ว")
+                        time.sleep(2)
+                        st.rerun()
+                    except Exception as e:
+                        conn.rollback()
+                        st.error(f"❌ ลบไม่สำเร็จ: {e}")
+                elif not confirm_1:
+                    st.warning("สติจ้า กรุณายืนยันการลบก่อน")
         except Exception as e:
             st.error(f"❌ โหลดรายชื่อผู้ใช้ล้มเหลว: {e}")

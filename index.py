@@ -28,7 +28,7 @@ if "redirect_to" in st.session_state:
 page = st.query_params.get("page", "login")
 
 def main_user():
-    st.set_page_config(page_title="Goalpoint Focomm", layout="wide", page_icon="")
+    st.set_page_config(page_title="Goalpoint Focomm", layout="wide", page_icon="",menu_items={} )
 
     with st.sidebar:
         
@@ -43,7 +43,9 @@ def main_user():
         user_page3.user_page3()
 
 def main_admin():
-    st.set_page_config(page_title="Goalpoint Focomm", layout="wide", page_icon="")
+    st.set_page_config(page_title="Goalpoint Focomm", 
+                       layout="wide", 
+                       page_icon="")
 
     with st.sidebar:
         

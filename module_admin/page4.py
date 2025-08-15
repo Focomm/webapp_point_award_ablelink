@@ -82,13 +82,19 @@ def admin_page4():
                                 st.markdown("📭 ไม่มีไฟล์แนบ")
 
                 selected_rows = [row for row in rows if st.session_state.get(f"select_{row.id}", False)]
-                
-                submit_personal = ui.button("Submit คำร้องที่เลือก (ส่วนบุคคล)", key="add_point", variant="default")
 
+                colA, colB = st.columns([0.1, 0.8])
+                with colA:
+                    submit_personal = ui.button("Submit", key="submit_personal", variant="default")
+                with colB:
+                    reject_personal = ui.button("Reject", key="reject_personal", variant="destructive")
+
+                # --- อนุมัติ ---
                 if submit_personal:
                     if not selected_rows:
                         st.warning("⚠️ กรุณาเลือกคำร้อง")
                     else:
+                        any_success = False
                         for row in selected_rows:
                             try:
                                 if not row.user_ref_id or row.point_value is None:
@@ -106,7 +112,7 @@ def admin_page4():
                                     st.error(f"❌ ไม่พบข้อมูลคะแนนเดิมของ {row.full_name}")
                                     continue
 
-                                # จัดการไฟล์และสถานะ
+                                # จัดการสถานะ (ย้ายไฟล์ถ้าต้องการ เหมือนเดิมของคุณ)
                                 now = datetime.datetime.now()
                                 year = str(now.year)
                                 month = str(now.month).zfill(2)
@@ -117,8 +123,17 @@ def admin_page4():
                                     old_path = os.path.join(row.path, row.new_name)
                                     if os.path.exists(old_path):
                                         file_ext = os.path.splitext(row.original_name)[-1]
-                                        new_name = row.new_name + file_ext
+                                        base, _ = os.path.splitext(row.new_name)
+                                        new_name = base + file_ext
                                         new_path = os.path.join(save_dir, new_name)
+
+                                        # กันชื่อชน
+                                        counter = 1
+                                        while os.path.exists(new_path):
+                                            new_name = f"{base}_{counter}{file_ext}"
+                                            new_path = os.path.join(save_dir, new_name)
+                                            counter += 1
+
                                         shutil.move(old_path, new_path)
 
                                         conn.execute(text("""
@@ -139,12 +154,38 @@ def admin_page4():
                                         WHERE id = :id
                                     """), {"id": row.id})
 
-                                st.success(f"✅ อัปเดตคำร้องของ {row.full_name} แล้ว")
-                                time.sleep(2)  # ให้เวลาในการแสดงผลก่อน rerun
-                                st.rerun()  # รีเฟรชหน้าเพื่อแสดงผลที่อัปเดต
+                                any_success = True
                             except Exception as e:
                                 st.error(f"❌ {row.full_name}: {e}")
-                        conn.commit()
+
+                        if any_success:
+                            conn.commit()
+                            st.success("✅ อัปเดตคำร้องที่เลือกเรียบร้อย")
+                            time.sleep(1)
+                            st.rerun()
+
+                # --- ยกเลิก (reject) ---
+                if reject_personal:
+                    if not selected_rows:
+                        st.warning("⚠️ กรุณาเลือกคำร้อง")
+                    else:
+                        any_success = False
+                        for row in selected_rows:
+                            try:
+                                conn.execute(text("""
+                                    UPDATE kpigoalpoint.file_messages_personal
+                                    SET status = 'reject', updated_at = now()
+                                    WHERE id = :id
+                                """), {"id": row.id})
+                                any_success = True
+                            except Exception as e:
+                                st.error(f"❌ {row.full_name}: {e}")
+
+                        if any_success:
+                            conn.commit()
+                            st.success("🛑 ยกเลิกคำร้องที่เลือก (ส่วนบุคคล) แล้ว")
+                            time.sleep(1)
+                            st.rerun()
 
         # ---------------------------------------------
 
@@ -202,13 +243,19 @@ def admin_page4():
                                 st.markdown("📭 ไม่มีไฟล์แนบ")
 
                 selected_rows = [row for row in rows if st.session_state.get(f"select_team_{row.id}", False)]
-                
-                submit_team = ui.button("Submit คำร้องที่เลือก (ทีม)", key="add_point", variant="default")
 
+                colA, colB = st.columns([0.1, 0.8])
+                with colA:
+                    submit_team = ui.button("Submit", key="submit_team", variant="default")
+                with colB:
+                    reject_team = ui.button("Reject", key="reject_team", variant="destructive")
+
+                # --- อนุมัติ ---
                 if submit_team:
                     if not selected_rows:
                         st.warning("⚠️ กรุณาเลือกคำร้อง")
                     else:
+                        any_success = False
                         for row in selected_rows:
                             try:
                                 if row.point_value is None or not row.dept_ref_id:
@@ -235,8 +282,17 @@ def admin_page4():
                                     old_path = os.path.join(row.path, row.new_name)
                                     if os.path.exists(old_path):
                                         file_ext = os.path.splitext(row.original_name)[-1]
-                                        new_name = row.new_name + file_ext
+                                        base, _ = os.path.splitext(row.new_name)
+                                        new_name = base + file_ext
                                         new_path = os.path.join(save_dir, new_name)
+
+                                        # กันชื่อชน
+                                        counter = 1
+                                        while os.path.exists(new_path):
+                                            new_name = f"{base}_{counter}{file_ext}"
+                                            new_path = os.path.join(save_dir, new_name)
+                                            counter += 1
+
                                         shutil.move(old_path, new_path)
 
                                         conn.execute(text("""
@@ -257,12 +313,38 @@ def admin_page4():
                                         WHERE id = :id
                                     """), {"id": row.id})
 
-                                st.success(f"✅ อัปเดตคำร้องของแผนก {row.dept_name} แล้ว")
-                                time.sleep(2)  # ให้เวลาในการแสดงผลก่อน rerun
-                                st.rerun()  # รีเฟรชหน้าเพื่อแสดงผลที่อัปเดต
+                                any_success = True
                             except Exception as e:
                                 st.error(f"❌ {row.dept_name}: {e}")
-                        conn.commit()
+
+                        if any_success:
+                            conn.commit()
+                            st.success("✅ อัปเดตคำร้องที่เลือกเรียบร้อย (ทีม)")
+                            time.sleep(1)
+                            st.rerun()
+
+                # --- ยกเลิก (reject) ---
+                if reject_team:
+                    if not selected_rows:
+                        st.warning("⚠️ กรุณาเลือกคำร้อง")
+                    else:
+                        any_success = False
+                        for row in selected_rows:
+                            try:
+                                conn.execute(text("""
+                                    UPDATE kpigoalpoint.file_messages_team
+                                    SET status = 'reject', updated_at = now()
+                                    WHERE id = :id
+                                """), {"id": row.id})
+                                any_success = True
+                            except Exception as e:
+                                st.error(f"❌ {row.dept_name}: {e}")
+
+                        if any_success:
+                            conn.commit()
+                            st.success("🛑 ยกเลิกคำร้องที่เลือก (ทีม) แล้ว")
+                            time.sleep(1)
+                            st.rerun()
                         
                         
     elif selected_action == "Req use point":
@@ -317,7 +399,7 @@ def admin_page4():
 
                 selected_rows = [row for row in rows if st.session_state.get(f"approve_req_{row.id}", False)]
 
-                submit = ui.button("อนุมัติคำขอที่เลือก", key="add_point", variant="default")
+                submit = ui.button("Submit", key="add_point", variant="default")
 
                 if submit:
                     if not selected_rows:

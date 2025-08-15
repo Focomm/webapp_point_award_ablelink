@@ -1,15 +1,27 @@
 import streamlit as st
 import bcrypt
+import requests
+import time
+import streamlit_shadcn_ui as ui
+
+
 from db import get_connection_readonly
 from sqlalchemy import text
-import time
+from PIL import Image
+from io import BytesIO
+
+
 
 def login_page():
     if "authenticated" not in st.session_state:
         st.session_state.authenticated = False
 
     if not st.session_state.authenticated:
-        st.title("🔐 Login Page")
+        url = "https://www.focomm-cabling.com/wp-content/uploads/2022/05/LOGO-2-150x60.png"
+        resp = requests.get(url)
+        img = Image.open(BytesIO(resp.content))
+        
+        st.image(img, width=150)
         with st.form("login_form"):
             User_ID = st.text_input("User ID")
             password = st.text_input("Password", type="password")
@@ -19,7 +31,7 @@ def login_page():
             try:
                 conn = get_connection_readonly()  # ← SQLAlchemy Connection
 
-                # 🔐 ดึง hashed_password จาก auth_credentials
+                # ดึง hashed_password จาก auth_credentials
                 result = conn.execute(
                     text("""
                         SELECT hashed_password 

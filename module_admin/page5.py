@@ -39,8 +39,10 @@ def admin_page5():
                     kpi_name = st.text_input("🎯 ชื่อ KPI ส่วนบุคคล")
                     kpi_goal = st.text_area("📌 เป้าหมายของ KPI")
                     point_value = st.number_input("คะแนน", min_value=0, step=1)
+                    # add_kpi_button = ui.button("เพิ่ม KPI ส่วนบุคคล", key="add_kpi_personal",variant="destructive")
+                    add_kpi_button_personal = ui.button("เพิ่ม KPI ส่วนบุคคล", key="add_kpi_personal",variant="default")
 
-                    if st.button("➕ เพิ่ม KPI ส่วนบุคคล"):
+                    if add_kpi_button_personal:
                         if not kpi_name.strip() or not kpi_goal.strip():
                             st.warning("⚠️ กรุณากรอกข้อมูลให้ครบถ้วน")
                         else:
@@ -81,8 +83,10 @@ def admin_page5():
                     kpi_name = st.text_input("🎯 ชื่อ KPI ทีม")
                     kpi_goal = st.text_area("📌 เป้าหมายของ KPI ทีม")
                     point_value = st.number_input("คะแนน", min_value=0, step=1)
+                    add_kpi_button_team = ui.button("เพิ่ม KPI ทีม", key="add_kpi_team",variant="default")
 
-                    if st.button("➕ เพิ่ม KPI ทีม"):
+
+                    if add_kpi_button_team:
                         if not kpi_name.strip() or not kpi_goal.strip():
                             st.warning("⚠️ กรุณากรอกข้อมูลให้ครบถ้วน")
                         else:
@@ -144,8 +148,9 @@ def admin_page5():
                     selected_id = kpi_dict[selected_label]
 
                     confirm = st.checkbox("คุณแน่ใจหรือไม่ว่าต้องการลบ KPI นี้?", key="confirm_kpi_personal")
+                    delete_kpi_button_personal = ui.button("ลบ KPI ส่วนบุคคล", key="delete_kpi_personal",variant="destructive")
 
-                    if st.button("✅ ยืนยันการลบ KPI ส่วนบุคคล"):
+                    if delete_kpi_button_personal:
                         if confirm:
                             try:
                                 conn.execute(text("DELETE FROM kpigoalpoint.kpi_personal WHERE id = :id"), {"id": selected_id})
@@ -177,8 +182,10 @@ def admin_page5():
                     selected_id = kpi_dict[selected_label]
 
                     confirm = st.checkbox("คุณแน่ใจหรือไม่ว่าต้องการลบ KPI ทีมนี้?", key="confirm_kpi_team")
+                    delete_kpi_button_team = ui.button("ลบ KPI ทีม", key="delete_kpi_team",variant="destructive")
 
-                    if st.button("✅ ยืนยันการลบ KPI ทีม"):
+
+                    if delete_kpi_button_team:
                         if confirm:
                             try:
                                 conn.execute(text("DELETE FROM kpigoalpoint.kpi_team WHERE id = :id"), {"id": selected_id})
@@ -205,13 +212,16 @@ def admin_page5():
             conn = get_connection_app()
 
             # --- ส่วนเพิ่มรางวัล ---
-            st.subheader("➕ เพิ่มรางวัลใหม่")
+            st.subheader("เพิ่มรางวัลใหม่")
             # reward_type = st.radio("🎯 ประเภทของรางวัล", ("user", "team"), key="reward_type_add")
             reward_type = ui.tabs(options=['ส่วนบุคคล', 'ทีม'], default_value='ส่วนบุคคล', key="kanaries")
             reward_name = st.text_input("🏅 ชื่อรางวัล", key="reward_name_add")
             reward_point = st.number_input("🎁 Point ที่ใช้แลก", min_value=1, step=1, key="reward_point_add")
 
-            if st.button("✅ เพิ่มรางวัล"):
+
+            add_reward_button = ui.button("เพิ่มรางวัล", key="add_reward",variant="default")
+
+            if add_reward_button:
                 if not reward_name.strip():
                     st.warning("⚠️ กรุณากรอกชื่อรางวัล")
                 else:
@@ -233,7 +243,7 @@ def admin_page5():
             st.divider()
 
             # --- ส่วนลบรางวัล ---
-            st.subheader("🗑️ ลบรางวัล")
+            st.subheader("ลบรางวัล")
 
             result = conn.execute(text("""
                 SELECT id, reward_type, reward_name, reward_point
@@ -254,8 +264,9 @@ def admin_page5():
                 selected_id = reward_dict[selected_label]
 
                 confirm = st.checkbox("⚠️ ยืนยันการลบรางวัลนี้", key="confirm_delete_reward")
+                delete_reward_button = ui.button("ลบรางวัล", key="delete_reward", variant="destructive")
 
-                if st.button("🗑️ ลบรางวัล"):
+                if delete_reward_button:
                     if not confirm:
                         st.warning("⚠️ กรุณาติ๊กยืนยันก่อนลบ")
                     else:
