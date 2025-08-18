@@ -1,0 +1,68 @@
+# Streamlit config.toml (sample full template)
+# Place this file at: .streamlit/config.toml
+# Notes:
+# - This template covers commonly used/official sections and keys.
+# - Adjust values as needed. Unknown keys will be ignored by Streamlit.
+
+############################
+# 1) THEME
+############################
+[theme]
+# Default app theme
+base = "light"                        # "light" | "dark"
+# Brand colors and typography
+primaryColor = "#FF4B4B"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F0F2F6"
+textColor = "#31333F"
+font = "sans serif"                   # "sans serif" | "serif" | "monospace"
+
+############################
+# 2) SERVER
+############################
+[server]
+headless = true                       # Run without opening a browser
+address = "0.0.0.0"                   # Bind address
+port = 8502                          # Default port
+enableCORS = false                    # Disable if behind reverse proxy
+enableXsrfProtection = false           # CSRF protection (recommended true)
+fileWatcherType = "auto"              # "auto" | "poll" | "watchdog" (auto = best available)
+maxUploadSize = 200                   # MB limit for file uploads
+runOnSave = false                     # Auto-rerun on file save in dev
+
+############################
+# 3) BROWSER / CLIENT HOST
+############################
+[browser]
+serverAddress = "localhost"           # Public host for users
+serverPort = 8501                     # Public port for users
+gatherUsageStats = false              # Telemetry
+
+############################
+# 4) CLIENT UI BEHAVIOR
+############################
+[client]
+toolbarMode = "minimal"               # "full" | "minimal" | "hidden"
+showErrorDetails = true               # Show detailed tracebacks to users
+
+############################
+# 5) SCRIPT RUNNER
+############################
+[runner]
+magicEnabled = true                   # Magic commands / implicit printing
+fastReruns = true                     # Faster hot-reloads during dev
+enforceSerializableSessionState = true  # Ensure session_state objects are serializable
+
+############################
+# 6) MAPBOX (if you use st.map with Mapbox styles)
+############################
+[mapbox]
+# Obtain a token from https://account.mapbox.com/
+token = ""
+
+############################
+# 7) LOGGER
+############################
+[logger]
+level = "error"                        # "debug" | "info" | "warning" | "error"
+messageFormat = "%(asctime)s %(levelname)s %(message)s"
