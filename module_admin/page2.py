@@ -7,7 +7,7 @@ import bcrypt
 import time
 
 def admin_page2():
-    st.title("👤 จัดการผู้ใช้งาน")
+    st.title("จัดการผู้ใช้งาน")
 
     action = ["เพิ่มผู้ใช้", "แก้ไขผู้ใช้", "ลบผู้ใช้"]
     st.sidebar.header("การดำเนินการ")
@@ -107,7 +107,7 @@ def admin_page2():
             st.error(f"❌ โหลดข้อมูลแผนกล้มเหลว: {e}")
 
     elif selected_dept == "แก้ไขผู้ใช้":
-        st.subheader("✏️ แก้ไขข้อมูลผู้ใช้")
+        st.subheader("แก้ไขข้อมูลผู้ใช้")
         try:
             user_df = pd.read_sql(text("SELECT user_id, full_name, nickname FROM kpigoalpoint.users ORDER BY full_name"), conn)
 
@@ -173,7 +173,7 @@ def admin_page2():
             st.error(f"❌ โหลดข้อมูลผู้ใช้ล้มเหลว: {e}")
 
     elif selected_dept == "ลบผู้ใช้":
-        st.subheader("🗑️ ลบผู้ใช้")
+        st.subheader("ลบผู้ใช้")
         try:
             user_df = pd.read_sql(text("SELECT user_id, full_name, nickname FROM kpigoalpoint.users ORDER BY full_name"), conn)
 

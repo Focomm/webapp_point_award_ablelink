@@ -32,7 +32,7 @@ def admin_page1():
         df['point_value'] = df['point_value'].fillna(0).astype(int)
 
         # Sidebar filter
-        st.sidebar.header("🔎 ตัวกรองข้อมูล")
+        st.sidebar.header("ตัวกรองข้อมูล")
 
         # ตัวเลือกแผนก
         all_depts = ['ทั้งหมด'] + sorted(df['dept_name'].unique().tolist())
@@ -72,7 +72,7 @@ def admin_page1():
         with col2:
             ui.metric_card(title="Team Point", content=int(total_dpmt), description="คะแนนแผนก", key="card2")
 
-        st.markdown("### 👥 รายชื่อพนักงาน")
+        st.markdown("### รายชื่อพนักงาน")
         # st.dataframe(
         #     filtered_df[['full_name', 'nickname', 'dept_name', 'point_value']],
         #     use_container_width=True

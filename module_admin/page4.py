@@ -16,7 +16,7 @@ def admin_page4():
     selected_action = st.sidebar.selectbox("เลือกการจัดการ", action)
 
     if selected_action == "Req get point":
-        st.title("📥 Request Get Point")
+        st.title("Request Get Point")
         st.write("------")
 
         # เลือกประเภทคำร้อง
@@ -348,7 +348,7 @@ def admin_page4():
                         
                         
     elif selected_action == "Req use point":
-        st.title("📥 ตรวจสอบคำขอแลก Point")
+        st.title("ตรวจสอบคำขอแลก Point")
         st.write("------")
 
         # ✅ เลือกประเภทคำร้อง
@@ -430,7 +430,7 @@ def admin_page4():
     
     
     elif selected_action == "History get point":
-        st.title("📜 ประวัติการจัดการคำร้อง")
+        st.title("ประวัติการจัดการคำร้อง")
         st.write('------')
 
         conn = get_connection_app()
@@ -503,7 +503,7 @@ def admin_page4():
 
     elif selected_action == "History use point":
         
-        st.title("📜 ประวัติการอนุมัติคำขอแลก Point")
+        st.title("ประวัติการอนุมัติคำขอแลก Point")
         st.write('------')
 
         conn = get_connection_app()

@@ -1,7 +1,9 @@
 import streamlit as st
 import streamlit_shadcn_ui as ui
-from sqlalchemy import text
 import pandas as pd
+import time
+
+from sqlalchemy import text
 from db import get_connection_app
 
 
@@ -12,7 +14,7 @@ def admin_page5():
     
     
     if selected_KPI == "Add KPI":
-        st.title("📊 เพิ่ม KPI")
+        st.title("เพิ่ม KPI")
         st.write('------')
 
         try:
@@ -32,12 +34,12 @@ def admin_page5():
                     st.warning("⚠️ ยังไม่มีผู้ใช้งานในระบบ กรุณาเพิ่มผู้ใช้ก่อนสร้าง KPI")
                 else:
                     user_dict = {f"{row.full_name} ({row.user_id})": row.user_id for row in users}
-                    selected_user_display = st.selectbox("👤 เลือกผู้ใช้", list(user_dict.keys()))
+                    selected_user_display = st.selectbox("เลือกผู้ใช้", list(user_dict.keys()))
                     selected_user_id = user_dict[selected_user_display]
 
                     st.write('------')
-                    kpi_name = st.text_input("🎯 ชื่อ KPI ส่วนบุคคล")
-                    kpi_goal = st.text_area("📌 เป้าหมายของ KPI")
+                    kpi_name = st.text_input("ชื่อ KPI ส่วนบุคคล")
+                    kpi_goal = st.text_area("เป้าหมายของ KPI")
                     point_value = st.number_input("คะแนน", min_value=0, step=1)
                     # add_kpi_button = ui.button("เพิ่ม KPI ส่วนบุคคล", key="add_kpi_personal",variant="destructive")
                     add_kpi_button_personal = ui.button("เพิ่ม KPI ส่วนบุคคล", key="add_kpi_personal",variant="default")
@@ -80,8 +82,8 @@ def admin_page5():
                     selected_dept_id = dept_dict[selected_dept_display]
 
                     st.write('------')
-                    kpi_name = st.text_input("🎯 ชื่อ KPI ทีม")
-                    kpi_goal = st.text_area("📌 เป้าหมายของ KPI ทีม")
+                    kpi_name = st.text_input("ชื่อ KPI ทีม")
+                    kpi_goal = st.text_area("เป้าหมายของ KPI ทีม")
                     point_value = st.number_input("คะแนน", min_value=0, step=1)
                     add_kpi_button_team = ui.button("เพิ่ม KPI ทีม", key="add_kpi_team",variant="default")
 
@@ -119,7 +121,7 @@ def admin_page5():
         
     
     elif selected_KPI == "Delete KPI":
-        st.title("🗑️ ลบ KPI")
+        st.title("ลบ KPI")
         st.write("------")
 
         try:
@@ -205,7 +207,7 @@ def admin_page5():
         
     elif selected_KPI == "Manage Award":
         
-        st.title("🏆 จัดการรางวัล (Reward)")
+        st.title("จัดการรางวัล (Reward)")
         st.write("------")
 
         try:
@@ -213,13 +215,14 @@ def admin_page5():
 
             # --- ส่วนเพิ่มรางวัล ---
             st.subheader("เพิ่มรางวัลใหม่")
-            # reward_type = st.radio("🎯 ประเภทของรางวัล", ("user", "team"), key="reward_type_add")
-            reward_type = ui.tabs(options=['ส่วนบุคคล', 'ทีม'], default_value='ส่วนบุคคล', key="kanaries")
-            reward_name = st.text_input("🏅 ชื่อรางวัล", key="reward_name_add")
-            reward_point = st.number_input("🎁 Point ที่ใช้แลก", min_value=1, step=1, key="reward_point_add")
+            reward_type_tab = ui.tabs(options=['ส่วนบุคคล', 'ทีม'], default_value='ส่วนบุคคล', key="kanaries")
+            reward_name = st.text_input("ชื่อรางวัล", key="reward_name_add")
+            reward_point = st.number_input("Point ที่ใช้แลก", min_value=1, step=1, key="reward_point_add")
 
+            # ✅ แปลงค่า tab เป็นค่า DB
+            reward_type_value = "user" if reward_type_tab == "ส่วนบุคคล" else "team"
 
-            add_reward_button = ui.button("เพิ่มรางวัล", key="add_reward",variant="default")
+            add_reward_button = ui.button("เพิ่มรางวัล", key="add_reward", variant="default")
 
             if add_reward_button:
                 if not reward_name.strip():
@@ -230,12 +233,14 @@ def admin_page5():
                             INSERT INTO kpigoalpoint.reward (reward_type, reward_name, reward_point)
                             VALUES (:reward_type, :reward_name, :reward_point)
                         """), {
-                            "reward_type": reward_type,
+                            "reward_type": reward_type_value,
                             "reward_name": reward_name.strip(),
                             "reward_point": reward_point
                         })
                         conn.commit()
                         st.success(f"✅ เพิ่มรางวัลสำเร็จ: {reward_name.strip()}")
+                        time.sleep(2)
+                        st.rerun()  # auto-refresh หลังเพิ่ม
                     except Exception as e:
                         conn.rollback()
                         st.error(f"❌ เพิ่มรางวัลไม่สำเร็จ: {e}")
@@ -245,25 +250,37 @@ def admin_page5():
             # --- ส่วนลบรางวัล ---
             st.subheader("ลบรางวัล")
 
+            # ใช้ reward_type_value เดียวกับตอนเพิ่ม
             result = conn.execute(text("""
                 SELECT id, reward_type, reward_name, reward_point
                 FROM kpigoalpoint.reward
-                ORDER BY reward_type, reward_name
-            """))
+                WHERE reward_type = :rtype
+                ORDER BY reward_name
+            """), {"rtype": reward_type_value})
             rewards = result.fetchall()
 
             if not rewards:
-                st.info("📭 ยังไม่มีรายการรางวัลในระบบ")
+                st.info(f"📭 ยังไม่มีรายการรางวัลประเภท {reward_type_tab}")
             else:
                 reward_dict = {
-                    f"[{row.reward_type}] {row.reward_name} ({row.reward_point} pts)": row.id
+                    f"{row.reward_name} ({row.reward_point} pts)": row.id
                     for row in rewards
                 }
 
-                selected_label = st.selectbox("เลือกรางวัลที่จะลบ", list(reward_dict.keys()), key="reward_delete_select")
+                selected_label = st.selectbox(
+                    f"เลือกรางวัลที่จะลบ ({reward_type_tab})", 
+                    list(reward_dict.keys()), 
+                    key="reward_delete_select"
+                )
                 selected_id = reward_dict[selected_label]
 
-                confirm = st.checkbox("⚠️ ยืนยันการลบรางวัลนี้", key="confirm_delete_reward")
+                # ✅ ใช้ value=False แทนการแก้ session_state หลังสร้าง
+                confirm = st.checkbox(
+                    "⚠️ ยืนยันการลบรางวัลนี้",
+                    value=False,
+                    key="confirm_delete_reward"
+                )
+
                 delete_reward_button = ui.button("ลบรางวัล", key="delete_reward", variant="destructive")
 
                 if delete_reward_button:
@@ -277,7 +294,10 @@ def admin_page5():
                             """), {"id": selected_id})
                             conn.commit()
                             st.success("✅ ลบรางวัลเรียบร้อยแล้ว")
-                            st.rerun()
+                            
+                            # ไม่ต้องแก้ session_state ของ checkbox
+                            time.sleep(2)
+                            st.rerun()  # หน้า refresh → checkbox จะกลับมาไม่ติ๊ก
                         except Exception as e:
                             conn.rollback()
                             st.error(f"❌ ลบรางวัลไม่สำเร็จ: {e}")
@@ -289,7 +309,7 @@ def admin_page5():
                 conn.close()
     
     elif selected_KPI == "View KPI ALL":
-        st.title("📋 ดูรายการ KPI ทั้งหมด")
+        st.title("ดูรายการ KPI ทั้งหมด")
 
         conn = get_connection_app()
 

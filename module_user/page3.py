@@ -14,11 +14,11 @@ def user_page3():
    user_id = st.session_state.user_id
 
    action = ["ขอ Point ส่วนตัว", "ขอ Point ทีม", "ประวัติขอการ Point"]
-   st.sidebar.header("🔎 ตัวกรองข้อมูล")
+   st.sidebar.header("ตัวกรองข้อมูล")
    select_option = st.sidebar.selectbox("เลือกการจัดการ", action)
 
    if select_option == "ขอ Point ส่วนตัว":
-      st.title("📎 ส่งไฟล์แนบและข้อความถึงระบบ/ผู้ดูแล")
+      st.title("ส่งไฟล์แนบและข้อความถึงระบบ/ผู้ดูแล")
 
       conn_kpi = get_connection_app()
       kpi_query = text("""
@@ -35,14 +35,14 @@ def user_page3():
          selected_kpi_id = None
       else:
          kpi_dict = {f"{row.kpi_name} (ID: {row.id})": row.id for row in kpi_list}
-         selected_kpi_name = st.selectbox("🎯 เลือก KPI ที่เกี่ยวข้อง", list(kpi_dict.keys()))
+         selected_kpi_name = st.selectbox("เลือก KPI ที่เกี่ยวข้อง", list(kpi_dict.keys()))
          selected_kpi_id = kpi_dict[selected_kpi_name]
          
          st.write('------')
 
          with st.form("upload_form", clear_on_submit=True):
-            uploaded_file = st.file_uploader("📁 แนบไฟล์", type=["pdf", "jpg", "jpeg", "png", "docx", "xlsx", "csv"])
-            message = st.text_area("📝 ข้อความเพิ่มเติม", placeholder="พิมพ์ข้อความที่ต้องการส่งถึงผู้ดูแล...")
+            uploaded_file = st.file_uploader("แนบไฟล์", type=["pdf", "jpg", "jpeg", "png", "docx", "xlsx", "csv"])
+            message = st.text_area("ข้อความเพิ่มเติม", placeholder="พิมพ์ข้อความที่ต้องการส่งถึงผู้ดูแล...")
             status = "onprocess"
             submitted = st.form_submit_button("✅ ส่งข้อมูล")
 
@@ -121,7 +121,7 @@ def user_page3():
 
 
    elif select_option == "ขอ Point ทีม":
-      st.title("📎 ส่งไฟล์แนบและข้อความถึงระบบ/ผู้ดูแล (ทีม)")
+      st.title("ส่งไฟล์แนบและข้อความถึงระบบ/ผู้ดูแล (ทีม)")
 
       conn = get_connection_app()
       dept_query = text("""
@@ -151,14 +151,14 @@ def user_page3():
          selected_kpi_id = None
       else:
          kpi_dict = {f"{row.kpi_name} (ID: {row.id})": row.id for row in kpi_list}
-         selected_kpi_name = st.selectbox("🎯 เลือก KPI ทีมที่เกี่ยวข้อง", list(kpi_dict.keys()))
+         selected_kpi_name = st.selectbox("เลือก KPI ทีมที่เกี่ยวข้อง", list(kpi_dict.keys()))
          selected_kpi_id = kpi_dict[selected_kpi_name]
 
          st.write('------')
 
          with st.form("upload_form_team", clear_on_submit=True):
-            uploaded_file = st.file_uploader("📁 แนบไฟล์", type=["pdf", "jpg", "jpeg", "png", "docx", "xlsx", "csv"])
-            message = st.text_area("📝 ข้อความเพิ่มเติม", placeholder="พิมพ์ข้อความที่ต้องการส่งถึงผู้ดูแล...")
+            uploaded_file = st.file_uploader("แนบไฟล์", type=["pdf", "jpg", "jpeg", "png", "docx", "xlsx", "csv"])
+            message = st.text_area("ข้อความเพิ่มเติม", placeholder="พิมพ์ข้อความที่ต้องการส่งถึงผู้ดูแล...")
             status = "onprocess"
             submitted = st.form_submit_button("✅ ส่งข้อมูล")
 
@@ -237,7 +237,7 @@ def user_page3():
 
 
    elif select_option == "ประวัติขอการ Point":
-      st.title("📜 ประวัติการขอ Point")
+      st.title("ประวัติการขอ Point")
 
       
       try:

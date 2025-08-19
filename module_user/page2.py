@@ -8,11 +8,11 @@ from sqlalchemy import text
 
 def user_page2():
     action = ["โอน Point", "แลก Point ส่วนตัว", "แลก Point ทีม","ประวัติการใช้งาน point"]
-    st.sidebar.header("🔎 ตัวกรองข้อมูล")
+    st.sidebar.header("ตัวกรองข้อมูล")
     selected_dept = st.sidebar.selectbox("เลือกการจัดการ", action)
 
     if selected_dept == "โอน Point":
-        st.title("🔄 โอนคะแนนให้ผู้อื่น")
+        st.title("โอนคะแนนให้ผู้อื่น")
 
         user_id = st.session_state.get("user_id")
         if not user_id:
@@ -41,10 +41,10 @@ def user_page2():
                 for _, row in user_df.iterrows()
             }
 
-            recipient_display = st.selectbox("👥 เลือกผู้รับ Point", list(user_map.keys()))
+            recipient_display = st.selectbox("เลือกผู้รับ Point", list(user_map.keys()))
             recipient_user_id = user_map[recipient_display]
 
-            point_input = st.number_input("📤 จำนวน Point ที่ต้องการโอน", min_value=1, step=1)
+            point_input = st.number_input("จำนวน Point ที่ต้องการโอน", min_value=1, step=1)
 
             col_preview1, col_preview2 = st.columns(2)
             with col_preview1:
@@ -82,7 +82,7 @@ def user_page2():
             st.error(f"❌ เกิดข้อผิดพลาดในการโหลดข้อมูล: {e}")
             
     elif selected_dept == "แลก Point ส่วนตัว":
-        st.title("🎁 แลก Point ส่วนตัว")
+        st.title("แลก Point ส่วนตัว")
         st.write("------")
 
         # ✅ ตรวจสอบว่า user login อยู่
@@ -102,7 +102,7 @@ def user_page2():
             """), {"user_id": user_id})
             point_row = result.fetchone()
             user_point = point_row.point_value if point_row else 0
-            st.markdown(f"💰 Point คงเหลือของคุณ: **{user_point:,}**")
+            st.markdown(f"Point คงเหลือของคุณ: **{user_point:,}**")
 
             # ✅ ดึงรายการ reward เฉพาะของ user
             result = conn.execute(text("""
@@ -124,12 +124,12 @@ def user_page2():
                 selected_label = st.selectbox("เลือกรางวัลที่ต้องการแลก", list(reward_dict.keys()))
                 selected_reward_id, selected_reward_point = reward_dict[selected_label]
 
-                st.markdown(f"🎯 Point ที่ต้องใช้: **{selected_reward_point:,}**")
+                st.markdown(f"Point ที่ต้องใช้: **{selected_reward_point:,}**")
 
                 if user_point < selected_reward_point:
                     st.warning("⚠️ Point ของคุณไม่เพียงพอสำหรับรางวัลนี้")
                 else:
-                    if st.button("📤 ส่งคำขอแลก Point"):
+                    if st.button("ส่งคำขอแลก Point"):
                         try:
                             # ✅ หัก point
                             result = conn.execute(text("""
@@ -180,7 +180,7 @@ def user_page2():
                 
                 
     elif selected_dept == "แลก Point ทีม":
-        st.title("🏢 แลก Point ทีม")
+        st.title("แลก Point ทีม")
         st.write("------")
 
         user_id = st.session_state.get("user_id")
@@ -206,7 +206,7 @@ def user_page2():
 
             dept_id = str(dept_row.dept_id)
             dept_point = dept_row.point_dpmt or 0
-            st.markdown(f"💰 Point คงเหลือของทีมคุณ: **{dept_point:,}**")
+            st.markdown(f"Point คงเหลือของทีมคุณ: **{dept_point:,}**")
 
             # 🎯 ดึงรางวัลที่เป็นประเภททีม
             result = conn.execute(text("""
@@ -228,12 +228,12 @@ def user_page2():
                 selected_label = st.selectbox("เลือกรางวัลที่ต้องการแลก", list(reward_dict.keys()))
                 selected_reward_id, selected_reward_point = reward_dict[selected_label]
 
-                st.markdown(f"🎯 Point ที่ต้องใช้: **{selected_reward_point:,}**")
+                st.markdown(f"Point ที่ต้องใช้: **{selected_reward_point:,}**")
 
                 if dept_point < selected_reward_point:
                     st.warning("⚠️ Point ของทีมไม่เพียงพอสำหรับรางวัลนี้")
                 else:
-                    if st.button("📤 ส่งคำขอแลก Point ทีม"):
+                    if st.button("ส่งคำขอแลก Point ทีม"):
                         try:
                             # ✅ หัก point ของทีม
                             result = conn.execute(text("""
@@ -282,7 +282,7 @@ def user_page2():
 
     
     elif selected_dept == "ประวัติการใช้งาน point":
-        st.title("📜 ประวัติการแลก Point")
+        st.title("ประวัติการแลก Point")
         st.write("------")
 
         user_id = st.session_state.get("user_id")
@@ -339,13 +339,13 @@ def user_page2():
                 target_df[:] = target_df.astype(object).where(pd.notnull(target_df), None)
 
             # === แสดงผล ===
-            st.subheader("🙋‍♂️ ประวัติการแลกรางวัลส่วนตัว")
+            st.subheader("ประวัติการแลกรางวัลส่วนตัว")
             if df_personal.empty:
-                st.info("📭 ยังไม่มีการแลกรางวัลส่วนตัว")
+                st.info("ยังไม่มีการแลกรางวัลส่วนตัว")
             else:
                 ui.table(df_personal, maxHeight=300)
 
-            st.subheader("🤝 ประวัติการแลกรางวัลทีม")
+            st.subheader("ประวัติการแลกรางวัลทีม")
             if df_team.empty:
                 st.info("📭 ยังไม่มีการแลกรางวัลของทีม")
             else:
