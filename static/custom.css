@@ -60,3 +60,8 @@ a.nav-link, a.nav-link.active,
 .stApp a {
   font-family: var(--font-sans) !important;
 }
+
+div[class^="st-emotion-cache"],
+div[class*=" st-emotion-cache"] {
+  font-family: 'Sarabun', sans-serif !important;
+}

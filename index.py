@@ -95,4 +95,5 @@ if st.session_state.authenticated and st.session_state.user_role:
 else:
     from login import login_page
     st.set_page_config(page_title="Goalpoint Focomm")
+    load_local_css("static/custom.css")
     login_page()

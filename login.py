@@ -10,7 +10,9 @@ from sqlalchemy import text
 from PIL import Image
 from io import BytesIO
 
-
+def load_local_css(file_name):
+    with open(file_name, encoding="utf-8") as f:   # บังคับใช้ UTF-8
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 def login_page():
     if "authenticated" not in st.session_state:
