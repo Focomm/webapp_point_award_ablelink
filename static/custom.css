@@ -1,0 +1,62 @@
+/* ==========================
+   Force Sarabun Everywhere
+   ========================== */
+
+/* โหลดฟอนต์ */
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap');
+
+:root {
+  --font-sans: 'Sarabun', sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+/* Streamlit ปกติ */
+html, body, .stApp, .stApp * {
+  font-family: var(--font-sans) !important;
+}
+
+/* Sidebar */
+[data-testid="stSidebar"], [data-testid="stSidebar"] * {
+  font-family: var(--font-sans) !important;
+}
+
+/* ---------------------------
+   Streamlit Option Menu
+   --------------------------- */
+nav, nav ul, nav li, nav a,
+a.nav-link, a.nav-link.active,
+[data-testid="stSidebar"] a.nav-link,
+[data-testid="stSidebar"] a.nav-link.active {
+  font-family: var(--font-sans) !important;
+}
+
+/* ---------------------------
+   Shadcn UI (streamlit_shadcn_ui)
+   --------------------------- */
+
+/* Override ทุก utility class font ของ tailwind */
+.font-sans,
+[class*="font-sans"],
+[class*="tracking-tight"],
+[class*="text-sm"],
+[class*="text-base"],
+[class*="text-lg"],
+[class*="text-xl"],
+[class^="ui-"], [class*=" ui-"],
+[class*="shadcn"], [class*="shcn"], 
+[data-theme*="shadcn"] {
+  font-family: var(--font-sans) !important;
+}
+
+/* Override heading ที่ gen ข้างใน component */
+.ui-card h1, .ui-card h2, .ui-card h3, .ui-card h4, .ui-card h5, .ui-card h6,
+[class*="ui-"] h1, [class*="ui-"] h2, [class*="ui-"] h3, [class*="ui-"] h4, [class*="ui-"] h5, [class*="ui-"] h6,
+[class*="shadcn"] h1, [class*="shadcn"] h2, [class*="shadcn"] h3, [class*="shadcn"] h4, [class*="shadcn"] h5, [class*="shadcn"] h6,
+.tracking-tight.text-sm.font-medium {
+  font-family: var(--font-sans) !important;
+}
+
+/* กันพลาดสุดท้าย - ทุก <a> ใน stApp */
+.stApp a {
+  font-family: var(--font-sans) !important;
+}

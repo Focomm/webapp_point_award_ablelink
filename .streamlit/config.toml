@@ -1,68 +1,100 @@
-# Streamlit config.toml (sample full template)
-# Place this file at: .streamlit/config.toml
-# Notes:
-# - This template covers commonly used/official sections and keys.
-# - Adjust values as needed. Unknown keys will be ignored by Streamlit.
+# =========================
+# Streamlit Config v1.44.1
+# =========================
 
-############################
-# 1) THEME
-############################
-[theme]
-# Default app theme
-base = "light"                        # "light" | "dark"
-# Brand colors and typography
-primaryColor = "#FF4B4B"
-backgroundColor = "#FFFFFF"
-secondaryBackgroundColor = "#F0F2F6"
-textColor = "#31333F"
-font = "sans serif"                   # "sans serif" | "serif" | "monospace"
+[global]
+disableWidgetStateDuplicationWarning = false  # ปิดคำเตือนเวลา widget ใช้ key ซ้ำกับ session_state
+showWarningOnDirectExecution = true           # แสดง warning ถ้ารันสคริปต์ตรง (python file.py) แทนที่จะใช้ streamlit run
 
-############################
-# 2) SERVER
-############################
-[server]
-headless = true                       # Run without opening a browser
-address = "0.0.0.0"                   # Bind address
-port = 8502                          # Default port
-enableCORS = false                    # Disable if behind reverse proxy
-enableXsrfProtection = false           # CSRF protection (recommended true)
-fileWatcherType = "auto"              # "auto" | "poll" | "watchdog" (auto = best available)
-maxUploadSize = 200                   # MB limit for file uploads
-runOnSave = false                     # Auto-rerun on file save in dev
-
-############################
-# 3) BROWSER / CLIENT HOST
-############################
-[browser]
-serverAddress = "localhost"           # Public host for users
-serverPort = 8501                     # Public port for users
-gatherUsageStats = false              # Telemetry
-
-############################
-# 4) CLIENT UI BEHAVIOR
-############################
-[client]
-toolbarMode = "minimal"               # "full" | "minimal" | "hidden"
-showErrorDetails = true               # Show detailed tracebacks to users
-
-############################
-# 5) SCRIPT RUNNER
-############################
-[runner]
-magicEnabled = true                   # Magic commands / implicit printing
-fastReruns = true                     # Faster hot-reloads during dev
-enforceSerializableSessionState = true  # Ensure session_state objects are serializable
-
-############################
-# 6) MAPBOX (if you use st.map with Mapbox styles)
-############################
-[mapbox]
-# Obtain a token from https://account.mapbox.com/
-token = ""
-
-############################
-# 7) LOGGER
-############################
 [logger]
-level = "error"                        # "debug" | "info" | "warning" | "error"
-messageFormat = "%(asctime)s %(levelname)s %(message)s"
+level = "error"                               # ระดับ log ที่จะโชว์: "error" | "warning" | "info" | "debug"
+messageFormat = "%(asctime)s %(message)s"     # รูปแบบข้อความ log
+
+[client]
+showErrorDetails = "full"                     # วิธีโชว์ error ในเว็บ: "full"|"stacktrace"|"type"|"none"
+toolbarMode = "minimal"                       # โหมด toolbar: "auto"|"developer"|"viewer"|"minimal"
+showSidebarNavigation = true                  # เปิด/ปิด navbar multipage (ถ้ามีโฟลเดอร์ pages/)
+
+[runner]
+magicEnabled = true                           # ให้ใช้ “magic commands” เช่น พิมพ์ตัวแปรแล้วแสดงผลได้เลย
+fastReruns = true                             # rerun script เร็วขึ้นเมื่อแก้ไขไฟล์
+enforceSerializableSessionState = true        # session_state ต้อง serializable (ปลอดภัยกว่า)
+enumCoercion = "nameOnly"                     # วิธีจัดการ Enum: "off"|"nameOnly"|"nameAndValue"
+
+[server]
+fileWatcherType = "auto"                      # วิธีตรวจไฟล์เปลี่ยนแปลง: "auto"|"watchdog"|"poll"|"none"
+headless = true                               # รันแบบไม่เปิด browser อัตโนมัติ
+runOnSave = false                             # rerun อัตโนมัติเมื่อ save ไฟล์ (dev mode)
+address = "0.0.0.0"                           # bind address (0.0.0.0 = เปิดทุก IP)
+port = 8502                                   # พอร์ตที่ใช้รัน server (default 8501)
+baseUrlPath = ""                              # base path (เช่น "/app")
+enableCORS = true                             # เปิด CORS
+enableXsrfProtection = true                   # เปิดป้องกัน XSRF (Cross-site Request Forgery)
+maxUploadSize = 200                           # ขนาดไฟล์อัปโหลดสูงสุด (MB)
+maxMessageSize = 200                          # ขนาด message สูงสุดที่ client-server ส่งกัน (MB)
+enableWebsocketCompression = false            # บีบอัด websocket หรือไม่
+enableStaticServing = true                    # เปิดเสิร์ฟไฟล์ static จาก .streamlit/static/
+disconnectedSessionTTL = 120                  # อายุ session หลัง disconnect (วินาที)
+# sslCertFile = ""                            # ไฟล์ SSL cert (ถ้าอยากรัน https เอง)
+# sslKeyFile  = ""                            # ไฟล์ SSL key
+# cookieSecret = "your-secret"                # ใช้ cookie เดียวกันเวลา scale หลาย instance
+
+[browser]
+serverAddress = "localhost"                   # hostname/IP ที่จะแสดงให้ผู้ใช้
+serverPort = 8502                             # พอร์ตใน URL ของผู้ใช้
+gatherUsageStats = false                      # ส่ง usage stats ไปที่ Streamlit หรือไม่
+# serverEnableXsrfProtection = true            # ใหม่ (แยกจาก server.enableXsrfProtection)
+
+[mapbox]
+token = ""                                    # (Deprecated) Mapbox token — แนะนำใช้ ENV MAPBOX_API_KEY แทน
+
+[theme]
+# ---- Base Theme ----
+base = "light"                           # "light" | "dark"
+primaryColor = "#FF4B4B"                 # สีหลัก เช่น ปุ่ม
+backgroundColor = "#FFFFFF"              # สีพื้นหลังหลัก
+secondaryBackgroundColor = "#F0F2F6"     # สีพื้นหลังรอง
+textColor = "#31333F"                    # สีข้อความ
+linkColor = "#1C83E1"                    # สีลิงก์
+codeBackgroundColor = "#F5F5F5"          # สีพื้นหลังโค้ด
+borderColor = "#E5E7EB"                  # สีเส้นขอบ
+showSidebarBorder = true                 # แสดงเส้นขอบ sidebar
+
+# ---- New in v1.44.1 ----
+widgetBorderColor = "#DDDDDD"            # สีขอบ widget
+focusColor = "#FF0000"                   # สีเมื่อ focus (เช่น input focus)
+successColor = "#28a745"                 # สี success เช่น ข้อความยืนยัน
+warningColor = "#ffc107"                 # สี warning เช่น คำเตือน
+errorColor = "#dc3545"                   # สี error เช่น ฟอร์มไม่ผ่าน
+
+# ---- Shape & Layout ----
+baseRadius = "medium"                    # มุมโค้งของ UI: "none"|"small"|"medium"|"large"
+buttonRadius = "medium"                  # มุมโค้งของปุ่ม
+dataframeBorderColor = "#E5E7EB"         # สีเส้นขอบ dataframe
+dataframeHeaderBackgroundColor = "#F8FAFC" # สี header dataframe
+showWidgetBorder = true                  # แสดงเส้นขอบ widget
+chartCategoricalColors = ["#FF4B4B", "#1C83E1", "#28a745"]   # สี category
+chartSequentialColors = ["#f7fbff", "#4292c6", "#08306b"]    # สี gradient/sequential
+
+# ---- Typography ----
+baseFontSize = 16                        # ขนาด font พื้นฐาน (px)
+baseFontWeight = 400                     # น้ำหนักตัวอักษรทั่วไป
+headingFontSizes = [24, 20, 16]          # ขนาด heading: h1,h2,h3
+headingFontWeights = [700, 600, 500]     # น้ำหนัก heading
+codeFont = "monospace"                   # ฟอนต์โค้ด
+codeFontSize = "0.875rem"                # ขนาดโค้ด
+codeFontWeight = 400                     # น้ำหนักโค้ด
+
+# ---- Custom Fonts ----
+# font        = "Nunito, sans-serif"      # ฟอนต์หลัก + fallback
+# headingFont = "Nunito, sans-serif"      # (แนะนำ) ให้หัวข้อใช้ Nunito ด้วย
+
+[theme.sidebar]
+primaryColor = "#FF4B4B"                 # สีหลักของ sidebar
+textColor = "#31333F"                    # สีข้อความใน sidebar
+linkColor = "#1C83E1"                    # สีลิงก์ใน sidebar
+codeBackgroundColor = "#F5F5F5"          # สีพื้นหลังโค้ดใน sidebar
+# backgroundColor = "hsla(0, 4%, 89%, 1.00)"   # ✅ สีพื้นหลัง sidebar (optional)
+# secondaryBackgroundColor = "#F0F2F6"         # ✅ สีพื้นหลังรองของ sidebar (optional)
+
+
